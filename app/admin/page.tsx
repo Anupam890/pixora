@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -30,6 +30,10 @@ import {
   Copy,
   LogOut,
   Database,
+  Upload,
+  Cloud,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   PromptItem,
@@ -71,6 +75,7 @@ function AdminDashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addToast } = usePixora();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Developer URL Authentication
   const urlKey = searchParams.get("key") || searchParams.get("secret") || searchParams.get("token");
@@ -91,6 +96,7 @@ function AdminDashboardContent() {
   // Modal create/edit state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<PromptItem | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Form fields
   const [formTitle, setFormTitle] = useState("");
@@ -166,6 +172,36 @@ function AdminDashboardContent() {
     const secretUrl = `${origin}/admin?key=pixora_dev_resqvbekntvuvmxkuyvm`;
     navigator.clipboard.writeText(secretUrl);
     addToast("URL Copied to Clipboard!", "Bookmark this private URL for 1-click access.");
+  };
+
+  // Cloudinary File Upload Handler
+  const handleCloudinaryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFormImage(data.url);
+        addToast("Cloudinary Upload Complete!", "Image stored on Cloudinary CDN.");
+      } else {
+        throw new Error(data.error || "Upload failed");
+      }
+    } catch (err: unknown) {
+      console.error("Cloudinary upload failed:", err);
+      addToast("Upload Error", err instanceof Error ? err.message : "Failed to upload image to Cloudinary", "warning");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const openCreateModal = () => {
@@ -323,27 +359,27 @@ function AdminDashboardContent() {
   if (!isAuthorizedDev) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8E8E5] shadow-xl space-y-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[#111111] text-white flex items-center justify-center mx-auto shadow-sm">
+        <div className="w-full max-w-md bg-white dark:bg-[#141414] rounded-3xl p-8 border border-[#E8E8E5] dark:border-[#262626] shadow-xl space-y-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] flex items-center justify-center mx-auto shadow-sm">
             <Lock className="w-7 h-7" />
           </div>
 
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-[#111111]">Developer Access Verification</h2>
-            <p className="text-xs text-[#6B6B6B] leading-relaxed">
+            <h2 className="text-xl font-bold text-[#111111] dark:text-white">Developer Access Verification</h2>
+            <p className="text-xs text-[#6B6B6B] dark:text-[#999999] leading-relaxed">
               This area is restricted to developers. To unlock access, enter your developer secret key or visit using your private URL.
             </p>
           </div>
 
           {authError && (
-            <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+            <p className="text-xs text-red-600 bg-red-50 dark:bg-red-950/60 p-2.5 rounded-xl border border-red-200 dark:border-red-900">
               {authError}
             </p>
           )}
 
           <form onSubmit={handleManualAuth} className="space-y-4">
             <div className="space-y-1 text-left">
-              <label className="text-xs font-semibold text-[#111111]">Developer Key / Passcode</label>
+              <label className="text-xs font-semibold text-[#111111] dark:text-[#EDEDED]">Developer Key / Passcode</label>
               <div className="relative">
                 <Key className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -351,24 +387,24 @@ function AdminDashboardContent() {
                   placeholder="Enter secret key or use your URL"
                   value={manualKeyInput}
                   onChange={(e) => setManualKeyInput(e.target.value)}
-                  className="w-full bg-[#FAFAF9] border border-[#E8E8E5] rounded-xl pl-9 pr-3 py-2.5 text-xs text-[#111111] focus:outline-none focus:border-[#6D5DFB]"
+                  className="w-full bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl pl-9 pr-3 py-2.5 text-xs text-[#111111] dark:text-white focus:outline-none focus:border-[#6D5DFB]"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#111111] hover:bg-[#2A2A2A] text-white text-xs font-semibold transition-colors"
+              className="w-full py-2.5 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-semibold transition-colors"
             >
               Verify Developer Key
             </button>
           </form>
 
-          <div className="pt-2 border-t border-[#F3F3F1] flex items-center justify-between text-xs text-[#6B6B6B]">
-            <Link href="/" className="hover:text-[#111111] transition-colors">
+          <div className="pt-2 border-t border-[#F3F3F1] dark:border-[#222222] flex items-center justify-between text-xs text-[#6B6B6B] dark:text-[#888888]">
+            <Link href="/" className="hover:text-[#111111] dark:hover:text-white transition-colors">
               ← Return to Home
             </Link>
-            <span className="text-[11px] text-[#999999] font-mono">
+            <span className="text-[11px] text-[#999999] dark:text-[#777777] font-mono">
               Ref: {SUPABASE_CONFIG.projectRef}
             </span>
           </div>
@@ -381,7 +417,7 @@ function AdminDashboardContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Developer Private Mode Header Banner */}
-      <div className="bg-[#111111] text-white p-4 sm:p-5 rounded-2xl border border-[#222222] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+      <div className="bg-[#111111] dark:bg-[#141414] text-white p-4 sm:p-5 rounded-2xl border border-[#222222] dark:border-[#282828] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
             <Database className="w-4 h-4" />
@@ -390,7 +426,10 @@ function AdminDashboardContent() {
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-white">Developer Mode Active</h2>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Connected: {SUPABASE_CONFIG.projectRef}
+                Supabase: {SUPABASE_CONFIG.projectRef}
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#6D5DFB]/20 text-[#6D5DFB] border border-[#6D5DFB]/30">
+                Cloudinary: eq0syso9
               </span>
             </div>
             <p className="text-[11px] text-gray-400">
@@ -402,7 +441,7 @@ function AdminDashboardContent() {
         <div className="flex items-center gap-2">
           <button
             onClick={copySecretUrl}
-            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Copy your private 1-click access URL"
           >
             <Copy className="w-3.5 h-3.5" />
@@ -411,7 +450,7 @@ function AdminDashboardContent() {
 
           <button
             onClick={handleRevokeAuth}
-            className="px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Exit and lock developer console"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -423,17 +462,17 @@ function AdminDashboardContent() {
       {/* Main Admin Title Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-[#111111] tracking-tight">
+          <h1 className="text-3xl font-extrabold text-[#111111] dark:text-white tracking-tight">
             Pixora Catalog & Operations
           </h1>
-          <p className="text-xs text-[#6B6B6B]">
-            Manage prompt blueprints, view real-time monetization analytics, and review reports.
+          <p className="text-xs text-[#6B6B6B] dark:text-[#9E9E9E]">
+            Manage prompt blueprints, upload images to Cloudinary CDN, and track analytics.
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111] hover:bg-[#2A2A2A] text-white text-xs font-semibold shadow-sm transition-colors self-start"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-semibold shadow-sm transition-colors self-start cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Prompt</span>
@@ -443,21 +482,21 @@ function AdminDashboardContent() {
       {/* KPI Stat Cards */}
       {analytics && (
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Total Prompts
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">{analytics.totalPrompts}</p>
+            <p className="text-2xl font-extrabold text-[#111111] dark:text-white">{analytics.totalPrompts}</p>
             <span className="text-[10px] text-emerald-600 font-medium">
               {analytics.publishedPrompts} Published
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Total Unlocks
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">
+            <p className="text-2xl font-extrabold text-[#111111] dark:text-white">
               {analytics.totalUnlocks.toLocaleString()}
             </p>
             <span className="text-[10px] text-[#6D5DFB] font-medium">
@@ -465,11 +504,11 @@ function AdminDashboardContent() {
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Unlock Conv. %
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">
+            <p className="text-2xl font-extrabold text-[#111111] dark:text-white">
               {analytics.unlockConversionRate}%
             </p>
             <span className="text-[10px] text-emerald-600 font-medium">
@@ -477,46 +516,46 @@ function AdminDashboardContent() {
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Total Favorites
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">
+            <p className="text-2xl font-extrabold text-[#111111] dark:text-white">
               {analytics.totalFavorites.toLocaleString()}
             </p>
             <span className="text-[10px] text-red-500 font-medium">High Intent</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Active Creators
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">
+            <p className="text-2xl font-extrabold text-[#111111] dark:text-white">
               {analytics.totalUsers.toLocaleString()}
             </p>
-            <span className="text-[10px] text-[#6B6B6B] font-medium">Global visitors</span>
+            <span className="text-[10px] text-[#6B6B6B] dark:text-[#888888] font-medium">Global visitors</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
-            <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424] space-y-1">
+            <span className="text-[11px] font-bold text-[#6B6B6B] dark:text-[#888888] uppercase tracking-wider block">
               Est. Ad Revenue
             </span>
-            <p className="text-2xl font-extrabold text-emerald-600">
+            <p className="text-2xl font-extrabold text-emerald-500">
               ${analytics.estimatedRevenueUsd.toLocaleString()}
             </p>
-            <span className="text-[10px] text-[#6B6B6B] font-medium">$18.50 eCPM</span>
+            <span className="text-[10px] text-[#6B6B6B] dark:text-[#888888] font-medium">$18.50 eCPM</span>
           </div>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E8E8E5] pb-2">
+      <div className="flex items-center gap-2 border-b border-[#E8E8E5] dark:border-[#242424] pb-2">
         <button
           onClick={() => setActiveTab("prompts")}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
             activeTab === "prompts"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           Prompt Catalog ({prompts.length})
@@ -526,8 +565,8 @@ function AdminDashboardContent() {
           onClick={() => setActiveTab("analytics")}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
             activeTab === "analytics"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           Model Analytics
@@ -537,8 +576,8 @@ function AdminDashboardContent() {
           onClick={() => setActiveTab("reports")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
             activeTab === "reports"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           <span>Reports Inbox</span>
@@ -552,27 +591,27 @@ function AdminDashboardContent() {
 
       {/* Tab 1: Prompt Catalog Table */}
       {activeTab === "prompts" && (
-        <div className="bg-white rounded-3xl border border-[#E8E8E5] overflow-hidden shadow-xs space-y-4 p-5">
+        <div className="bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#242424] overflow-hidden shadow-xs space-y-4 p-5">
           <div className="flex items-center justify-between gap-4">
             <div className="relative max-w-sm w-full">
-              <Search className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#999999] dark:text-[#666666] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search catalog by title, category, or model..."
                 value={searchTable}
                 onChange={(e) => setSearchTable(e.target.value)}
-                className="w-full bg-[#FAFAF9] border border-[#E8E8E5] rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none focus:border-[#6D5DFB]"
+                className="w-full bg-[#FAFAF9] dark:bg-[#1A1A1A] border border-[#E8E8E5] dark:border-[#2A2A2A] rounded-xl pl-9 pr-3 py-2 text-xs text-[#111111] dark:text-white focus:outline-none focus:border-[#6D5DFB]"
               />
             </div>
 
-            <span className="text-xs text-[#6B6B6B]">
+            <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">
               Showing {filteredPrompts.length} of {prompts.length} prompts
             </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAFAF9] text-[#6B6B6B] uppercase font-bold text-[10px] tracking-wider border-y border-[#E8E8E5]">
+              <thead className="bg-[#FAFAF9] dark:bg-[#1A1A1A] text-[#6B6B6B] dark:text-[#888888] uppercase font-bold text-[10px] tracking-wider border-y border-[#E8E8E5] dark:border-[#262626]">
                 <tr>
                   <th className="py-3 px-4">Preview</th>
                   <th className="py-3 px-4">Title</th>
@@ -583,41 +622,41 @@ function AdminDashboardContent() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F3F3F1]">
+              <tbody className="divide-y divide-[#F3F3F1] dark:divide-[#202020]">
                 {filteredPrompts.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#FAFAF9]/80 transition-colors">
+                  <tr key={p.id} className="hover:bg-[#FAFAF9]/80 dark:hover:bg-[#1A1A1A]/80 transition-colors">
                     <td className="py-3 px-4">
                       <img
                         src={p.imageUrl}
                         alt={p.title}
-                        className="w-12 h-12 rounded-xl object-cover border border-[#E8E8E5]"
+                        className="w-12 h-12 rounded-xl object-cover border border-[#E8E8E5] dark:border-[#262626]"
                       />
                     </td>
                     <td className="py-3 px-4 max-w-xs">
-                      <p className="font-bold text-[#111111] truncate">{p.title}</p>
-                      <p className="text-[11px] text-[#999999] truncate font-mono">/{p.slug}</p>
+                      <p className="font-bold text-[#111111] dark:text-white truncate">{p.title}</p>
+                      <p className="text-[11px] text-[#999999] dark:text-[#666666] truncate font-mono">/{p.slug}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-[#F3F3F1] font-semibold text-[#111111]">
+                      <span className="px-2 py-0.5 rounded-full bg-[#F3F3F1] dark:bg-[#1F1F1F] font-semibold text-[#111111] dark:text-white">
                         {p.category}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-medium text-[#6B6B6B]">{p.aiModel}</span>
+                      <span className="font-medium text-[#6B6B6B] dark:text-[#999999]">{p.aiModel}</span>
                     </td>
                     <td className="py-3 px-4">
                       <button
                         onClick={() => handleTogglePublish(p)}
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors ${
                           p.isPublished
-                            ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                         }`}
                       >
                         {p.isPublished ? "Published" : "Draft"}
                       </button>
                     </td>
-                    <td className="py-3 px-4 text-center font-bold text-[#111111]">
+                    <td className="py-3 px-4 text-center font-bold text-[#111111] dark:text-white">
                       {p.unlockCount.toLocaleString()}
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -625,21 +664,21 @@ function AdminDashboardContent() {
                         <Link
                           href={`/prompt/${p.slug}`}
                           target="_blank"
-                          className="p-1.5 rounded-lg text-gray-500 hover:text-[#111111] hover:bg-[#F3F3F1]"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#202020]"
                           title="Preview live"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                         </Link>
                         <button
                           onClick={() => openEditModal(p)}
-                          className="p-1.5 rounded-lg text-gray-500 hover:text-[#6D5DFB] hover:bg-[#F3F3F1]"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-[#6D5DFB] hover:bg-[#F3F3F1] dark:hover:bg-[#202020]"
                           title="Edit Prompt"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(p.id, p.title)}
-                          className="p-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50"
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                           title="Delete Prompt"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -657,8 +696,8 @@ function AdminDashboardContent() {
       {/* Tab 2: Analytics */}
       {activeTab === "analytics" && analytics && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="p-6 bg-white rounded-3xl border border-[#E8E8E5] space-y-4">
-            <h3 className="font-bold text-sm text-[#111111] uppercase tracking-wider">
+          <div className="p-6 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#242424] space-y-4">
+            <h3 className="font-bold text-sm text-[#111111] dark:text-white uppercase tracking-wider">
               Popular AI Models by Unlock Volume
             </h3>
             <div className="space-y-3">
@@ -668,10 +707,10 @@ function AdminDashboardContent() {
                 return (
                   <div key={m.model} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span>{m.model}</span>
-                      <span className="text-[#6B6B6B]">{m.unlocks.toLocaleString()} unlocks</span>
+                      <span className="text-[#111111] dark:text-white">{m.model}</span>
+                      <span className="text-[#6B6B6B] dark:text-[#888888]">{m.unlocks.toLocaleString()} unlocks</span>
                     </div>
-                    <div className="w-full bg-[#F3F3F1] h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-[#F3F3F1] dark:bg-[#1E1E1E] h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-[#6D5DFB] h-full rounded-full transition-all duration-500"
                         style={{ width: `${pct}%` }}
@@ -683,15 +722,15 @@ function AdminDashboardContent() {
             </div>
           </div>
 
-          <div className="p-6 bg-white rounded-3xl border border-[#E8E8E5] space-y-4">
-            <h3 className="font-bold text-sm text-[#111111] uppercase tracking-wider">
+          <div className="p-6 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#242424] space-y-4">
+            <h3 className="font-bold text-sm text-[#111111] dark:text-white uppercase tracking-wider">
               Category Distribution
             </h3>
             <div className="grid grid-cols-2 gap-3">
               {analytics.topCategories.map((c) => (
-                <div key={c.category} className="p-3 bg-[#FAFAF9] rounded-xl border border-[#E8E8E5]">
-                  <span className="text-xs text-[#6B6B6B] block">{c.category}</span>
-                  <span className="text-lg font-bold text-[#111111]">{c.count} Prompts</span>
+                <div key={c.category} className="p-3 bg-[#FAFAF9] dark:bg-[#191919] rounded-xl border border-[#E8E8E5] dark:border-[#282828]">
+                  <span className="text-xs text-[#6B6B6B] dark:text-[#888888] block">{c.category}</span>
+                  <span className="text-lg font-bold text-[#111111] dark:text-white">{c.count} Prompts</span>
                 </div>
               ))}
             </div>
@@ -701,38 +740,38 @@ function AdminDashboardContent() {
 
       {/* Tab 3: Reports */}
       {activeTab === "reports" && (
-        <div className="bg-white rounded-3xl border border-[#E8E8E5] p-6 space-y-4">
-          <h3 className="font-bold text-base text-[#111111]">Community Feedback & Reports</h3>
+        <div className="bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#242424] p-6 space-y-4">
+          <h3 className="font-bold text-base text-[#111111] dark:text-white">Community Feedback & Reports</h3>
           {reports.length > 0 ? (
             <div className="space-y-3">
               {reports.map((rep) => (
                 <div
                   key={rep.id}
-                  className="p-4 rounded-2xl bg-[#FAFAF9] border border-[#E8E8E5] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className="p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#191919] border border-[#E8E8E5] dark:border-[#282828] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-red-600 uppercase">
                         {rep.reason.replace("_", " ")}
                       </span>
-                      <span className="text-xs text-[#6B6B6B]">on "{rep.promptTitle}"</span>
+                      <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">on "{rep.promptTitle}"</span>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
                           rep.status === "reviewed"
-                            ? "bg-emerald-100 text-emerald-800"
+                            ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
                             : rep.status === "dismissed"
-                            ? "bg-gray-100 text-gray-600"
-                            : "bg-amber-100 text-amber-800"
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                            : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
                         }`}
                       >
                         {rep.status}
                       </span>
                     </div>
-                    <p className="text-xs text-[#111111]">
+                    <p className="text-xs text-[#111111] dark:text-white">
                       {rep.details || "No additional comments provided."}
                     </p>
                     {rep.userEmail && (
-                      <p className="text-[11px] text-[#999999]">From: {rep.userEmail}</p>
+                      <p className="text-[11px] text-[#999999] dark:text-[#666666]">From: {rep.userEmail}</p>
                     )}
                   </div>
 
@@ -745,7 +784,7 @@ function AdminDashboardContent() {
                     </button>
                     <button
                       onClick={() => handleReportAction(rep.id, "dismissed")}
-                      className="px-3 py-1.5 rounded-lg bg-[#EBEBE7] text-[#111111] text-xs font-semibold hover:bg-[#D5D5D0]"
+                      className="px-3 py-1.5 rounded-lg bg-[#EBEBE7] dark:bg-[#252525] text-[#111111] dark:text-white text-xs font-semibold hover:bg-[#D5D5D0]"
                     >
                       Dismiss
                     </button>
@@ -754,28 +793,28 @@ function AdminDashboardContent() {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-[#6B6B6B] py-8 text-center">No reports pending.</p>
+            <p className="text-xs text-[#6B6B6B] dark:text-[#888888] py-8 text-center">No reports pending.</p>
           )}
         </div>
       )}
 
-      {/* Create / Edit Prompt Modal */}
+      {/* Create / Edit Prompt Modal with Cloudinary Upload */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#E8E8E5] space-y-6 max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-2xl bg-white dark:bg-[#141414] rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#E8E8E5] dark:border-[#242424] space-y-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[#E8E8E5]">
-              <h3 className="font-bold text-xl text-[#111111]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E8E8E5] dark:border-[#242424]">
+              <h3 className="font-bold text-xl text-[#111111] dark:text-white">
                 {editingPrompt ? "Edit Prompt Blueprint" : "Create New AI Prompt"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600"
+                className="p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -784,56 +823,117 @@ function AdminDashboardContent() {
             <form onSubmit={handleSavePrompt} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#111111]">Title</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">Title</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Nordic Brutalist Villa"
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
-                    className="w-full p-2.5 bg-[#FAFAF9] border rounded-xl text-xs"
+                    className="w-full p-2.5 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#111111]">Slug (Optional)</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">Slug (Optional)</label>
                   <input
                     type="text"
                     placeholder="e.g. nordic-brutalist-villa"
                     value={formSlug}
                     onChange={(e) => setFormSlug(e.target.value)}
-                    className="w-full p-2.5 bg-[#FAFAF9] border rounded-xl text-xs font-mono"
+                    className="w-full p-2.5 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs font-mono text-[#111111] dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-[#111111]">Description</label>
+                <label className="text-xs font-bold text-[#111111] dark:text-white">Description</label>
                 <textarea
                   rows={2}
                   placeholder="Summary of visual composition, lighting, camera..."
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full p-2.5 bg-[#FAFAF9] border rounded-xl text-xs"
+                  className="w-full p-2.5 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-[#111111]">Image URL</label>
+              {/* Cloudinary Image Upload Section */}
+              <div className="space-y-2 p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#181818] border border-[#E8E8E5] dark:border-[#282828]">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#111111] dark:text-white flex items-center gap-1.5">
+                    <Cloud className="w-4 h-4 text-[#6D5DFB]" />
+                    <span>Image Storage (Cloudinary CDN)</span>
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-mono">Cloud: eq0syso9</span>
+                </div>
+
+                {/* Dropzone & File Trigger */}
                 <input
-                  type="url"
-                  required
-                  placeholder="https://..."
-                  value={formImage}
-                  onChange={(e) => setFormImage(e.target.value)}
-                  className="w-full p-2.5 bg-[#FAFAF9] border rounded-xl text-xs font-mono"
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleCloudinaryUpload}
+                  className="hidden"
                 />
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={uploadingImage}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {uploadingImage ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading to Cloudinary...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload File to Cloudinary</span>
+                      </>
+                    )}
+                  </button>
+
+                  <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">or paste image URL below</span>
+                </div>
+
+                <div className="pt-1">
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://res.cloudinary.com/eq0syso9/... or https://..."
+                    value={formImage}
+                    onChange={(e) => setFormImage(e.target.value)}
+                    className="w-full p-2.5 bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#282828] rounded-xl text-xs font-mono text-[#111111] dark:text-white"
+                  />
+                </div>
+
+                {/* Preview Thumbnail */}
+                {formImage && (
+                  <div className="flex items-center gap-3 pt-2">
+                    <img
+                      src={formImage}
+                      alt="Preview"
+                      className="w-14 h-14 rounded-xl object-cover border border-[#E8E8E5] dark:border-[#282828]"
+                    />
+                    <div className="text-[11px] text-[#6B6B6B] dark:text-[#888888] space-y-0.5 min-w-0">
+                      <p className="font-semibold text-emerald-600 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span>Image Ready</span>
+                      </p>
+                      <p className="truncate font-mono text-[10px]">{formImage}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Complete Prompt Text */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-[#111111] flex items-center justify-between">
+                <label className="text-xs font-bold text-[#111111] dark:text-white flex items-center justify-between">
                   <span>Complete AI Prompt (Locked Blueprint)</span>
-                  <span className="text-[10px] text-amber-600 font-mono">CONFIDENTIAL</span>
+                  <span className="text-[10px] text-amber-500 font-mono">CONFIDENTIAL</span>
                 </label>
                 <textarea
                   rows={4}
@@ -847,11 +947,11 @@ function AdminDashboardContent() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Category</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">Category</label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value as CategoryType)}
-                    className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs"
+                    className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c}>
@@ -862,11 +962,11 @@ function AdminDashboardContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">AI Model</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">AI Model</label>
                   <select
                     value={formModel}
                     onChange={(e) => setFormModel(e.target.value as AIModelType)}
-                    className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs"
+                    className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                   >
                     {AI_MODELS.map((m) => (
                       <option key={m} value={m}>
@@ -877,11 +977,11 @@ function AdminDashboardContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Aspect Ratio</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">Aspect Ratio</label>
                   <select
                     value={formRatio}
                     onChange={(e) => setFormRatio(e.target.value as AspectRatioType)}
-                    className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs"
+                    className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                   >
                     <option value="1:1">1:1</option>
                     <option value="16:9">16:9</option>
@@ -893,40 +993,41 @@ function AdminDashboardContent() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold">Seed (Optional)</label>
+                  <label className="text-xs font-bold text-[#111111] dark:text-white">Seed (Optional)</label>
                   <input
                     type="text"
                     value={formSeed}
                     onChange={(e) => setFormSeed(e.target.value)}
                     placeholder="849201"
-                    className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs font-mono"
+                    className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs font-mono text-[#111111] dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold">Tags (Comma-separated)</label>
+                <label className="text-xs font-bold text-[#111111] dark:text-white">Tags (Comma-separated)</label>
                 <input
                   type="text"
                   value={formTags}
                   onChange={(e) => setFormTags(e.target.value)}
                   placeholder="portrait, cinematic, editorial, 85mm"
-                  className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs"
+                  className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold">Negative Prompt (Optional)</label>
+                <label className="text-xs font-bold text-[#111111] dark:text-white">Negative Prompt (Optional)</label>
                 <input
                   type="text"
                   value={formNegative}
                   onChange={(e) => setFormNegative(e.target.value)}
                   placeholder="blurry, distorted hands, low quality"
-                  className="w-full p-2 bg-[#FAFAF9] border rounded-xl text-xs"
+                  className="w-full p-2 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl text-xs text-[#111111] dark:text-white"
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 pt-2">
+              {/* Toggles */}
+              <div className="flex flex-wrap items-center gap-6 pt-2 text-[#111111] dark:text-[#EDEDED]">
                 <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
                   <input
                     type="checkbox"
@@ -958,17 +1059,17 @@ function AdminDashboardContent() {
                 </label>
               </div>
 
-              <div className="pt-4 flex justify-end gap-2 border-t border-[#E8E8E5]">
+              <div className="pt-4 flex justify-end gap-2 border-t border-[#E8E8E5] dark:border-[#242424]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-gray-500 hover:bg-[#F3F3F1]"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-gray-500 hover:bg-[#F3F3F1] dark:hover:bg-[#1C1C1C]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-[#111111] hover:bg-[#2A2A2A] text-white text-xs font-bold transition-colors"
+                  className="px-6 py-2.5 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-bold transition-colors"
                 >
                   {editingPrompt ? "Save Changes" : "Publish Prompt"}
                 </button>

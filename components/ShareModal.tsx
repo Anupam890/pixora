@@ -31,7 +31,7 @@ export function ShareModal() {
   const shareChannels = [
     {
       name: "X / Twitter",
-      color: "bg-[#111111] text-white hover:bg-[#2A2A2A]",
+      color: "bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100",
       url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(currentUrl)}`,
     },
     {
@@ -53,55 +53,55 @@ export function ShareModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in-0 duration-200"
       onClick={() => setActiveSharePrompt(null)}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-[#E8E8E5] space-y-6"
+        className="relative w-full max-w-md bg-white dark:bg-[#141414] rounded-3xl p-6 shadow-2xl border border-[#E8E8E5] dark:border-[#262626] space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#F3F3F1] flex items-center justify-center text-[#111111]">
+            <div className="w-8 h-8 rounded-full bg-[#F3F3F1] dark:bg-[#202020] flex items-center justify-center text-[#111111] dark:text-white">
               <Share2 className="w-4 h-4" />
             </div>
-            <h3 className="font-bold text-lg text-[#111111]">Share Prompt</h3>
+            <h3 className="font-bold text-lg text-[#111111] dark:text-white">Share Prompt</h3>
           </div>
           <button
             onClick={() => setActiveSharePrompt(null)}
-            className="p-1.5 rounded-full text-[#999999] hover:text-[#111111] hover:bg-[#F3F3F1] transition-colors"
+            className="p-1.5 rounded-full text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#202020] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Preview snippet */}
-        <div className="flex items-center gap-3 p-3 bg-[#F3F3F1] rounded-2xl border border-[#E8E8E5]">
+        <div className="flex items-center gap-3 p-3 bg-[#F3F3F1] dark:bg-[#1C1C1C] rounded-2xl border border-[#E8E8E5] dark:border-[#282828]">
           <img
             src={activeSharePrompt.imageUrl}
             alt={activeSharePrompt.title}
             className="w-14 h-14 rounded-xl object-cover shrink-0"
           />
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-xs text-[#111111] truncate">{activeSharePrompt.title}</h4>
-            <p className="text-[11px] text-[#6B6B6B]">{activeSharePrompt.aiModel} · {activeSharePrompt.category}</p>
+            <h4 className="font-semibold text-xs text-[#111111] dark:text-white truncate">{activeSharePrompt.title}</h4>
+            <p className="text-[11px] text-[#6B6B6B] dark:text-[#888888]">{activeSharePrompt.aiModel} · {activeSharePrompt.category}</p>
             <span className="text-[10px] text-[#6D5DFB] font-medium">pixora.ai</span>
           </div>
         </div>
 
         {/* Copy link input */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-[#6B6B6B]">Prompt Page Link</label>
+          <label className="text-xs font-semibold text-[#6B6B6B] dark:text-[#999999]">Prompt Page Link</label>
           <div className="flex items-center gap-2">
             <input
               type="text"
               readOnly
               value={currentUrl}
-              className="flex-1 bg-[#FAFAF9] border border-[#E8E8E5] text-xs font-mono text-[#111111] rounded-xl px-3 py-2.5 truncate focus:outline-none"
+              className="flex-1 bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#282828] text-xs font-mono text-[#111111] dark:text-white rounded-xl px-3 py-2.5 truncate focus:outline-none"
             />
             <button
               onClick={handleCopyLink}
-              className="px-4 py-2.5 bg-[#111111] hover:bg-[#2A2A2A] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+              className="px-4 py-2.5 bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? "Copied" : "Copy"}</span>
@@ -111,7 +111,7 @@ export function ShareModal() {
 
         {/* Share Social buttons */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-[#6B6B6B]">Share to Social Media</label>
+          <label className="text-xs font-semibold text-[#6B6B6B] dark:text-[#999999]">Share to Social Media</label>
           <div className="grid grid-cols-2 gap-2">
             {shareChannels.map((channel) => (
               <a

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Cpu, Sliders, ExternalLink } from "lucide-react";
+import { ArrowLeft, Cpu, Sliders } from "lucide-react";
 import { PromptItem } from "@/lib/types";
 import { PromptCard } from "@/components/PromptCard";
 import { AdUnlockModal } from "@/components/AdUnlockModal";
@@ -96,25 +96,25 @@ export default function AIModelPage({
       <div>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#111111] transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white transition-colors mb-6 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Explore</span>
         </Link>
 
         <div className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#E8E8E5] text-xs font-bold uppercase tracking-wider text-[#111111]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#262626] text-xs font-bold uppercase tracking-wider text-[#111111] dark:text-white">
             <Cpu className="w-3.5 h-3.5 text-[#6D5DFB]" />
             <span>AI Model Architecture</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#111111] tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#111111] dark:text-white tracking-tight">
             {info.title}
           </h1>
-          <p className="text-base text-[#6B6B6B] leading-relaxed">
+          <p className="text-base text-[#6B6B6B] dark:text-[#9E9E9E] leading-relaxed">
             {info.subtitle}
           </p>
 
-          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] text-xs text-[#111111] font-medium flex items-start gap-3">
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#262626] text-xs text-[#111111] dark:text-white font-medium flex items-start gap-3">
             <Sliders className="w-4 h-4 text-[#6D5DFB] shrink-0 mt-0.5" />
             <span>{info.tip}</span>
           </div>
@@ -124,7 +124,7 @@ export default function AIModelPage({
       {loading ? (
         <div className="masonry-grid">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="masonry-item rounded-2xl bg-white p-3 space-y-3 border">
+            <div key={i} className="masonry-item rounded-2xl bg-white dark:bg-[#141414] p-3 space-y-3 border border-[#E8E8E5] dark:border-[#222222]">
               <div className="w-full h-64 rounded-xl animate-shimmer" />
             </div>
           ))}
@@ -143,12 +143,12 @@ export default function AIModelPage({
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white rounded-3xl border border-[#E8E8E5] p-8 space-y-3 max-w-md mx-auto">
-          <h3 className="font-bold text-sm text-[#111111]">No prompts matching this model yet</h3>
-          <p className="text-xs text-[#6B6B6B]">Check back shortly or explore our trending collection.</p>
+        <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-3 max-w-md mx-auto">
+          <h3 className="font-bold text-sm text-[#111111] dark:text-white">No prompts matching this model yet</h3>
+          <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">Check back shortly or explore our trending collection.</p>
           <Link
             href="/"
-            className="inline-block px-4 py-2 bg-[#111111] text-white text-xs font-semibold rounded-full"
+            className="inline-block px-4 py-2 bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold rounded-full cursor-pointer"
           >
             Explore Trending
           </Link>
@@ -159,7 +159,7 @@ export default function AIModelPage({
         prompt={unlockTargetPrompt}
         isOpen={isUnlockModalOpen}
         onClose={() => setIsUnlockModalOpen(false)}
-        onUnlockSuccess={(unlockedText) => {
+        onUnlockSuccess={() => {
           setPrompts((prev) =>
             prev.map((p) => (p.id === unlockTargetPrompt?.id ? { ...p, locked: false } : p))
           );

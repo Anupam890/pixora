@@ -10,9 +10,6 @@ import {
   Settings,
   Sparkles,
   ArrowRight,
-  Shield,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 import { usePixora } from "@/lib/context/PixoraContext";
 import { PromptItem } from "@/lib/types";
@@ -61,23 +58,23 @@ export default function ProfilePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Profile Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] dark:border-[#222222] flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#111111] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] flex items-center justify-center font-bold text-2xl shadow-sm">
             <User className="w-8 h-8" />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#111111]">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#111111] dark:text-white">
                 Creator Studio
               </h1>
               {isProUser && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
                   PRO
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#6B6B6B] font-mono">
+            <p className="text-xs text-[#6B6B6B] dark:text-[#888888] font-mono">
               Session ID: {userToken || "guest_session"}
             </p>
           </div>
@@ -86,7 +83,7 @@ export default function ProfilePage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setIsProModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#111111] text-white hover:bg-[#2A2A2A] text-xs font-semibold flex items-center gap-2 transition-colors"
+            className="px-4 py-2.5 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>{isProUser ? "Manage Pro" : "Upgrade to Pro"}</span>
@@ -95,13 +92,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E8E8E5] pb-2 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 border-b border-[#E8E8E5] dark:border-[#222222] pb-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab("unlocks")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
             activeTab === "unlocks"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           <Unlock className="w-4 h-4" />
@@ -110,10 +107,10 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setActiveTab("favorites")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
             activeTab === "favorites"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           <Heart className="w-4 h-4" />
@@ -122,10 +119,10 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setActiveTab("collections")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
             activeTab === "collections"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -134,10 +131,10 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
             activeTab === "settings"
-              ? "bg-[#111111] text-white"
-              : "text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1]"
+              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
+              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
           }`}
         >
           <Settings className="w-4 h-4" />
@@ -149,8 +146,8 @@ export default function ProfilePage() {
       {activeTab === "unlocks" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#111111]">Prompts You Have Unlocked</h3>
-            <span className="text-xs text-[#6B6B6B]">Always available without re-watching ads</span>
+            <h3 className="text-base font-bold text-[#111111] dark:text-white">Prompts You Have Unlocked</h3>
+            <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">Always available without re-watching ads</span>
           </div>
 
           {unlockedPrompts.length > 0 ? (
@@ -160,17 +157,17 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-3xl border border-[#E8E8E5] p-8 space-y-4 max-w-md mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-[#F3F3F1] flex items-center justify-center mx-auto text-[#6B6B6B]">
+            <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-md mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-[#F3F3F1] dark:bg-[#1C1C1C] flex items-center justify-center mx-auto text-[#6B6B6B] dark:text-[#999999]">
                 <Unlock className="w-6 h-6" />
               </div>
-              <h4 className="font-bold text-sm text-[#111111]">No unlocked prompts yet</h4>
-              <p className="text-xs text-[#6B6B6B]">
+              <h4 className="font-bold text-sm text-[#111111] dark:text-white">No unlocked prompts yet</h4>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
                 When you unlock prompts by watching a 5-sec ad, they appear here permanently.
               </p>
               <Link
                 href="/"
-                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] text-white text-xs font-semibold"
+                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold"
               >
                 Explore Prompts to Unlock
               </Link>
@@ -183,8 +180,8 @@ export default function ProfilePage() {
       {activeTab === "favorites" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#111111]">Saved Favorites</h3>
-            <span className="text-xs text-[#6B6B6B]">Your bookmarked inspiration</span>
+            <h3 className="text-base font-bold text-[#111111] dark:text-white">Saved Favorites</h3>
+            <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">Your bookmarked inspiration</span>
           </div>
 
           {favoritePrompts.length > 0 ? (
@@ -201,17 +198,17 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-3xl border border-[#E8E8E5] p-8 space-y-4 max-w-md mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mx-auto">
+            <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-md mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-500 flex items-center justify-center mx-auto">
                 <Heart className="w-6 h-6" />
               </div>
-              <h4 className="font-bold text-sm text-[#111111]">No favorites saved yet</h4>
-              <p className="text-xs text-[#6B6B6B]">
+              <h4 className="font-bold text-sm text-[#111111] dark:text-white">No favorites saved yet</h4>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
                 Tap the heart icon on any prompt card while browsing to save it here.
               </p>
               <Link
                 href="/"
-                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] text-white text-xs font-semibold"
+                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold"
               >
                 Browse Gallery
               </Link>
@@ -225,8 +222,8 @@ export default function ProfilePage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-[#111111]">Your Custom Collections</h3>
-              <p className="text-xs text-[#6B6B6B]">Organize prompts by project, client, or visual style.</p>
+              <h3 className="text-base font-bold text-[#111111] dark:text-white">Your Custom Collections</h3>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">Organize prompts by project, client, or visual style.</p>
             </div>
             <Link
               href="/collections"
@@ -240,13 +237,13 @@ export default function ProfilePage() {
             {collections.map((col) => (
               <div
                 key={col.id}
-                className="p-5 rounded-2xl bg-white border border-[#E8E8E5] space-y-3 hover:border-[#111111] transition-all"
+                className="p-5 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#222222] space-y-3 hover:border-[#111111] dark:hover:border-white transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#111111]">{col.name}</span>
-                  <span className="text-[11px] text-[#999999]">{col.promptIds.length} items</span>
+                  <span className="text-xs font-bold text-[#111111] dark:text-white">{col.name}</span>
+                  <span className="text-[11px] text-[#999999] dark:text-[#666666]">{col.promptIds.length} items</span>
                 </div>
-                <p className="text-xs text-[#6B6B6B]">{col.description || "Custom curated prompts."}</p>
+                <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">{col.description || "Custom curated prompts."}</p>
                 <Link
                   href="/collections"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-[#6D5DFB] hover:underline pt-2"
@@ -262,28 +259,28 @@ export default function ProfilePage() {
 
       {/* Tab 4: Preferences */}
       {activeTab === "settings" && (
-        <div className="max-w-xl bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] space-y-6">
-          <h3 className="text-lg font-bold text-[#111111]">Account & Plan Settings</h3>
+        <div className="max-w-xl bg-white dark:bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] dark:border-[#222222] space-y-6">
+          <h3 className="text-lg font-bold text-[#111111] dark:text-white">Account & Plan Settings</h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAFAF9] border border-[#E8E8E5]">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#262626]">
               <div>
-                <h4 className="text-xs font-bold text-[#111111]">Pixora Pro Plan</h4>
-                <p className="text-[11px] text-[#6B6B6B]">
+                <h4 className="text-xs font-bold text-[#111111] dark:text-white">Pixora Pro Plan</h4>
+                <p className="text-[11px] text-[#6B6B6B] dark:text-[#888888]">
                   {isProUser ? "Active — Enjoy ad-free instant unlocks" : "Free Plan — Ad-supported access"}
                 </p>
               </div>
               <button
                 onClick={toggleProUser}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#111111] text-white hover:bg-[#2A2A2A] transition-colors"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 {isProUser ? "Switch to Free" : "Upgrade to Pro"}
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#FAFAF9] border border-[#E8E8E5] space-y-2">
-              <h4 className="text-xs font-bold text-[#111111]">Session Persistence</h4>
-              <p className="text-xs text-[#6B6B6B]">
+            <div className="p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#262626] space-y-2">
+              <h4 className="text-xs font-bold text-[#111111] dark:text-white">Session Persistence</h4>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
                 Your unlocks and saved prompts are stored locally in this browser. To sync across devices, Supabase Auth connects instantly.
               </p>
             </div>

@@ -17,6 +17,8 @@ interface PixoraContextType {
   favorites: Set<string>;
   collections: UserCollection[];
   isProUser: boolean;
+  theme: "light" | "dark";
+  toggleTheme: () => void;
   toggleProUser: () => void;
   isUnlocked: (promptId: string) => boolean;
   getUnlockedText: (promptId: string) => string | undefined;
@@ -47,9 +49,11 @@ const LOCAL_STORAGE_KEYS = {
   FAVORITES: "pixora_favorites",
   COLLECTIONS: "pixora_collections",
   PRO_STATUS: "pixora_is_pro",
+  THEME: "pixora_theme",
 };
 
 export function PixoraProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [userToken, setUserToken] = useState<string>("");
   const [unlockedPromptIds, setUnlockedPromptIds] = useState<Set<string>>(new Set());
   const [unlockedPromptsMap, setUnlockedPromptsMap] = useState<Record<string, string>>({});
@@ -61,9 +65,19 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
   const [activeReportPrompt, setActiveReportPrompt] = useState<PromptItem | null>(null);
   const [isProModalOpen, setIsProModalOpen] = useState<boolean>(false);
 
-  // Initialize from LocalStorage
+  // Initialize from LocalStorage & System Theme
   useEffect(() => {
     try {
+      // Theme
+      const savedTheme = localStorage.getItem(LOCAL_STORAGE_KEYS.THEME) as "light" | "dark" | null;
+      if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        setTheme("dark");
+        document.documentElement.classList.add("dark");
+      } else {
+        setTheme("light");
+        document.documentElement.classList.remove("dark");
+      }
+
       // User Token
       let token = localStorage.getItem(LOCAL_STORAGE_KEYS.TOKEN);
       if (!token) {
@@ -93,7 +107,6 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
       if (savedColls) {
         setCollections(JSON.parse(savedColls));
       } else {
-        // Initial default collections
         const initialColls: UserCollection[] = [
           {
             id: "col-1",
@@ -127,6 +140,17 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
       console.warn("Local storage initialization failed", e);
     }
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.THEME, next);
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const addToast = (title: string, description?: string, type: "success" | "info" | "warning" = "success") => {
     const id = "toast-" + Math.random().toString(36).substring(2, 9);
@@ -192,7 +216,6 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
       nextFav ? "success" : "info"
     );
 
-    // Sync count with backend
     try {
       await fetch(`/api/prompts/${slug}/favorite`, {
         method: "POST",
@@ -276,6 +299,8 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
         favorites,
         collections,
         isProUser,
+        theme,
+        toggleTheme,
         toggleProUser,
         isUnlocked,
         getUnlockedText,

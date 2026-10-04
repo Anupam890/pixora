@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Lock, Unlock, X, Play, Volume2, VolumeX, ExternalLink, CheckCircle2, Sparkles, Loader2 } from "lucide-react";
+import { Lock, Unlock, X, Play, Volume2, VolumeX, ExternalLink, CheckCircle2, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { PromptItem } from "@/lib/types";
 import { usePixora } from "@/lib/context/PixoraContext";
@@ -38,7 +38,6 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
       setErrorMessage(null);
       setUnlockedPromptText("");
 
-      // Prefetch ad session
       fetch(`/api/prompts/${prompt.slug}/ad-start`, { method: "POST" })
         .then((res) => res.json())
         .then((data) => {
@@ -59,7 +58,6 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
         setSecondsLeft((prev) => prev - 1);
       }, 1000);
     } else if (adState === "playing" && secondsLeft === 0) {
-      // Ad finished -> verify & unlock
       handleAdFinished();
     }
     return () => clearInterval(timer);
@@ -75,7 +73,6 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
     setAdState("verifying");
 
     try {
-      // 1. Mark ad complete
       const verifyRes = await fetch(`/api/prompts/${prompt.slug}/ad-complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -87,7 +84,6 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
         throw new Error(verifyData.error || "Ad verification failed");
       }
 
-      // 2. Unlock prompt securely
       const unlockRes = await fetch(`/api/prompts/${prompt.slug}/unlock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +100,6 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
       recordUnlock(prompt.id, unlockData.promptText, unlockData.token);
       onUnlockSuccess(unlockData.promptText);
 
-      // Trigger celebration confetti
       try {
         confetti({
           particleCount: 80,
@@ -113,7 +108,7 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
           colors: ["#6D5DFB", "#4F6BFF", "#10B981", "#F59E0B"],
         });
       } catch (e) {
-        // Safe fallback if confetti isn't supported
+        // Fallback
       }
     } catch (err: unknown) {
       console.error(err);
@@ -125,31 +120,30 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
   if (!isOpen || !prompt) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in-0 duration-200">
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl border border-[#E8E8E5] transition-all"
+        className="relative w-full max-w-md bg-white dark:bg-[#141414] rounded-3xl overflow-hidden shadow-2xl border border-[#E8E8E5] dark:border-[#262626] transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Close */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#F3F3F1] flex items-center justify-center text-[#111111]">
+            <div className="w-8 h-8 rounded-full bg-[#F3F3F1] dark:bg-[#202020] flex items-center justify-center text-[#111111] dark:text-white">
               {adState === "completed" ? (
                 <Unlock className="w-4 h-4 text-[#6D5DFB]" />
               ) : (
                 <Lock className="w-4 h-4 text-amber-500" />
               )}
             </div>
-            <span className="text-xs font-semibold tracking-wider uppercase text-[#6B6B6B]">
+            <span className="text-xs font-semibold tracking-wider uppercase text-[#6B6B6B] dark:text-[#999999]">
               {adState === "completed" ? "Prompt Unlocked" : "Sponsored Unlock"}
             </span>
           </div>
 
-          {/* Close is disabled during active ad playback for compliance */}
           {adState !== "playing" && (
             <button
               onClick={onClose}
-              className="p-1.5 rounded-full text-[#999999] hover:text-[#111111] hover:bg-[#F3F3F1] transition-colors"
+              className="p-1.5 rounded-full text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#202020] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -160,29 +154,28 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
         {adState === "initial" && (
           <div className="p-6 pt-2 space-y-6 text-center">
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold tracking-tight text-[#111111]">
+              <h3 className="text-2xl font-bold tracking-tight text-[#111111] dark:text-white">
                 Unlock this prompt
               </h3>
-              <p className="text-sm text-[#6B6B6B] max-w-xs mx-auto">
+              <p className="text-sm text-[#6B6B6B] dark:text-[#999999] max-w-xs mx-auto">
                 Watch a short 5-second advertisement to reveal the complete AI prompt and parameters.
               </p>
             </div>
 
-            {/* Prompt preview thumbnail pill */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#F3F3F1] text-left border border-[#E8E8E5]">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#F3F3F1] dark:bg-[#1C1C1C] text-left border border-[#E8E8E5] dark:border-[#282828]">
               <img
                 src={prompt.imageUrl}
                 alt={prompt.title}
                 className="w-12 h-12 rounded-xl object-cover shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[#111111] truncate">{prompt.title}</p>
-                <p className="text-[11px] text-[#6B6B6B]">{prompt.aiModel} · {prompt.category}</p>
+                <p className="text-xs font-semibold text-[#111111] dark:text-white truncate">{prompt.title}</p>
+                <p className="text-[11px] text-[#6B6B6B] dark:text-[#888888]">{prompt.aiModel} · {prompt.category}</p>
               </div>
             </div>
 
             {errorMessage && (
-              <p className="text-xs text-red-500 bg-red-50 p-2.5 rounded-xl border border-red-200">
+              <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/60 p-2.5 rounded-xl border border-red-200 dark:border-red-900">
                 {errorMessage}
               </p>
             )}
@@ -190,12 +183,12 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
             <div className="space-y-3">
               <button
                 onClick={handleStartAd}
-                className="w-full py-3.5 px-6 rounded-2xl bg-[#111111] hover:bg-[#2A2A2A] text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white text-white group-hover:scale-110 transition-transform" />
+                <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
                 <span>Watch & Unlock</span>
               </button>
-              <p className="text-[12px] text-[#999999]">Takes only 5 seconds</p>
+              <p className="text-[12px] text-[#999999] dark:text-[#777777]">Takes only 5 seconds</p>
             </div>
           </div>
         )}
@@ -203,28 +196,25 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
         {/* State 2: Active Rewarded Ad Simulation */}
         {adState === "playing" && (
           <div className="p-6 pt-2 space-y-5">
-            {/* Ad Header / Timer Bar */}
-            <div className="flex items-center justify-between text-xs font-medium text-[#6B6B6B]">
-              <span className="bg-[#F3F3F1] px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#111111]">
+            <div className="flex items-center justify-between text-xs font-medium text-[#6B6B6B] dark:text-[#999999]">
+              <span className="bg-[#F3F3F1] dark:bg-[#222222] px-2.5 py-1 rounded-full text-[11px] font-semibold text-[#111111] dark:text-white">
                 SPONSORED
               </span>
               <div className="flex items-center gap-2 font-mono">
                 <span>Reward in</span>
-                <span className="w-6 h-6 rounded-full bg-[#111111] text-white flex items-center justify-center text-xs font-bold">
+                <span className="w-6 h-6 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] flex items-center justify-center text-xs font-bold">
                   {secondsLeft}s
                 </span>
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-[#F3F3F1] h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-[#F3F3F1] dark:bg-[#222222] h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-[#6D5DFB] h-full transition-all duration-1000 ease-linear rounded-full"
                 style={{ width: `${((5 - secondsLeft) / 5) * 100}%` }}
               />
             </div>
 
-            {/* Sponsor Video Screen Mockup */}
             <div className="relative aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-[#1A1A1A] to-[#111111] text-white p-5 flex flex-col justify-between border border-[#2A2A2A] shadow-inner">
               <div className="flex items-center justify-between z-10">
                 <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 font-bold backdrop-blur-xs">
@@ -232,7 +222,7 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
                 </span>
                 <button
                   onClick={() => setIsMuted(!isMuted)}
-                  className="p-1 rounded-full bg-black/40 hover:bg-black/60 text-white/80 transition-colors"
+                  className="p-1 rounded-full bg-black/40 hover:bg-black/60 text-white/80 transition-colors cursor-pointer"
                 >
                   {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                 </button>
@@ -261,11 +251,10 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
                 <span className="text-[10px] text-white/60">Audio {isMuted ? "Muted" : "On"}</span>
               </div>
 
-              {/* Background ambient lighting pulse */}
               <div className="absolute inset-0 bg-gradient-to-tr from-[#6D5DFB]/30 via-transparent to-[#4F6BFF]/20 animate-pulse pointer-events-none" />
             </div>
 
-            <p className="text-center text-[11px] text-[#999999]">
+            <p className="text-center text-[11px] text-[#999999] dark:text-[#777777]">
               Please watch until the timer reaches zero to claim your unlocked prompt.
             </p>
           </div>
@@ -276,8 +265,8 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
           <div className="p-8 text-center space-y-4">
             <Loader2 className="w-10 h-10 animate-spin text-[#6D5DFB] mx-auto" />
             <div className="space-y-1">
-              <h3 className="font-bold text-lg text-[#111111]">Verifying Ad Completion</h3>
-              <p className="text-xs text-[#6B6B6B]">Connecting with server to decrypt prompt data...</p>
+              <h3 className="font-bold text-lg text-[#111111] dark:text-white">Verifying Ad Completion</h3>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">Connecting with server to decrypt prompt data...</p>
             </div>
           </div>
         )}
@@ -285,26 +274,25 @@ export function AdUnlockModal({ prompt, isOpen, onClose, onUnlockSuccess }: AdUn
         {/* State 4: Completed */}
         {adState === "completed" && (
           <div className="p-6 pt-2 space-y-5 text-center">
-            <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
+            <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-2xl font-bold text-[#111111]">Prompt Unlocked!</h3>
-              <p className="text-xs text-[#6B6B6B]">
+              <h3 className="text-2xl font-bold text-[#111111] dark:text-white">Prompt Unlocked!</h3>
+              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
                 You can now view, copy, and create with this exact prompt.
               </p>
             </div>
 
-            {/* Prompt Preview Snippet */}
-            <div className="p-3.5 bg-[#F3F3F1] rounded-2xl text-left border border-[#E8E8E5] font-mono text-xs text-[#111111] max-h-24 overflow-y-auto leading-relaxed">
+            <div className="p-3.5 bg-[#F3F3F1] dark:bg-[#1C1C1C] rounded-2xl text-left border border-[#E8E8E5] dark:border-[#282828] font-mono text-xs text-[#111111] dark:text-white max-h-24 overflow-y-auto leading-relaxed">
               {unlockedPromptText}
             </div>
 
             <div className="pt-2">
               <button
                 onClick={onClose}
-                className="w-full py-3 px-6 rounded-2xl bg-[#111111] hover:bg-[#2A2A2A] text-white font-semibold text-sm transition-colors"
+                className="w-full py-3 px-6 rounded-2xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 font-semibold text-sm transition-colors cursor-pointer"
               >
                 View Full Prompt & Parameters
               </button>

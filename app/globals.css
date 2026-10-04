@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --bg-primary: #FAFAF9;
@@ -12,7 +14,21 @@
     --accent-hover: #5947F5;
     --accent-light: #F0EEFF;
     --border-subtle: #E8E8E5;
-    --border-dark: #2A2A2A;
+    --border-hover: #D5D5D0;
+  }
+
+  .dark {
+    --bg-primary: #0C0C0C;
+    --bg-secondary: #161616;
+    --bg-card: #131313;
+    --text-primary: #EDEDED;
+    --text-secondary: #9E9E9E;
+    --text-muted: #666666;
+    --accent: #6D5DFB;
+    --accent-hover: #7E70FF;
+    --accent-light: #201D38;
+    --border-subtle: #222222;
+    --border-hover: #333333;
   }
 
   body {
@@ -22,6 +38,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Custom scrollbar */
@@ -36,8 +53,14 @@
     background: #D5D5D0;
     border-radius: 9999px;
   }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #333333;
+  }
   ::-webkit-scrollbar-thumb:hover {
     background: #AFAFA8;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #444444;
   }
 }
 
@@ -56,6 +79,12 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.dark .glass-panel {
+  background: rgba(19, 19, 19, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-dark {
@@ -103,6 +132,11 @@
 
 .animate-shimmer {
   background: linear-gradient(90deg, #F3F3F1 25%, #EBEBE7 50%, #F3F3F1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+.dark .animate-shimmer {
+  background: linear-gradient(90deg, #181818 25%, #222222 50%, #181818 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite ease-in-out;
 }

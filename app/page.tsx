@@ -9,15 +9,8 @@ import { PromptItem, AIModelType, SortOptionType } from "@/lib/types";
 import {
   Flame,
   Filter,
-  Sparkles,
-  ArrowRight,
   SlidersHorizontal,
-  Compass,
-  CheckCircle2,
-  Lock,
-  Layers,
 } from "lucide-react";
-import Link from "next/link";
 import { usePixora } from "@/lib/context/PixoraContext";
 
 const AI_MODELS: (AIModelType | "All")[] = [
@@ -39,7 +32,6 @@ export default function HomePage() {
   const [unlockTargetPrompt, setUnlockTargetPrompt] = useState<PromptItem | null>(null);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
-  // Fetch prompts on filter change
   useEffect(() => {
     async function loadPrompts() {
       setLoading(true);
@@ -71,7 +63,6 @@ export default function HomePage() {
   };
 
   const handleUnlockSuccess = (promptText: string) => {
-    // Refresh local prompt state to reflect unlocked
     setPrompts((prev) =>
       prev.map((p) => (p.id === unlockTargetPrompt?.id ? { ...p, locked: false } : p))
     );
@@ -91,13 +82,13 @@ export default function HomePage() {
       {/* Main Discovery Gallery */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Gallery Header & Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#E8E8E5]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#E8E8E5] dark:border-[#222222]">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#6D5DFB]">
               <Flame className="w-4 h-4 text-orange-500" />
               <span>Trending Prompts</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#111111] dark:text-white tracking-tight mt-1">
               The prompts creators are unlocking right now.
             </h2>
           </div>
@@ -105,15 +96,15 @@ export default function HomePage() {
           {/* Filters & Sorting */}
           <div className="flex flex-wrap items-center gap-2">
             {/* AI Model Filter Pills */}
-            <div className="hidden sm:flex items-center gap-1 bg-[#F3F3F1] p-1 rounded-full border border-[#E8E8E5]">
+            <div className="hidden sm:flex items-center gap-1 bg-[#F3F3F1] dark:bg-[#181818] p-1 rounded-full border border-[#E8E8E5] dark:border-[#262626]">
               {AI_MODELS.slice(0, 4).map((model) => (
                 <button
                   key={model}
                   onClick={() => setSelectedModel(model)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     selectedModel === model
-                      ? "bg-[#111111] text-white shadow-xs"
-                      : "text-[#6B6B6B] hover:text-[#111111]"
+                      ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111] shadow-xs"
+                      : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white"
                   }`}
                 >
                   {model}
@@ -122,29 +113,29 @@ export default function HomePage() {
             </div>
 
             {/* Sort Select */}
-            <div className="flex items-center gap-1.5 bg-white border border-[#E8E8E5] rounded-full px-3 py-1.5 text-xs text-[#111111]">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#999999]" />
+            <div className="flex items-center gap-1.5 bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#262626] rounded-full px-3 py-1.5 text-xs text-[#111111] dark:text-white">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#999999] dark:text-[#666666]" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOptionType)}
                 className="bg-transparent font-medium focus:outline-none cursor-pointer"
               >
-                <option value="trending">Trending</option>
-                <option value="most-unlocked">Most Unlocked</option>
-                <option value="most-saved">Most Saved</option>
-                <option value="newest">Newest</option>
+                <option value="trending" className="dark:bg-[#141414]">Trending</option>
+                <option value="most-unlocked" className="dark:bg-[#141414]">Most Unlocked</option>
+                <option value="most-saved" className="dark:bg-[#141414]">Most Saved</option>
+                <option value="newest" className="dark:bg-[#141414]">Newest</option>
               </select>
             </div>
           </div>
         </div>
 
-        {/* Gallery Grid / Skeletons */}
+        {/* Gallery Grid */}
         {loading ? (
           <div className="masonry-grid">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="masonry-item rounded-2xl overflow-hidden bg-white border border-[#E8E8E5] p-3 space-y-3"
+                className="masonry-item rounded-2xl overflow-hidden bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#222222] p-3 space-y-3"
               >
                 <div
                   className="w-full rounded-xl animate-shimmer"
@@ -166,13 +157,12 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          /* Empty State */
-          <div className="text-center py-20 bg-white rounded-3xl border border-[#E8E8E5] p-8 space-y-4 max-w-lg mx-auto">
-            <div className="w-12 h-12 rounded-2xl bg-[#F3F3F1] flex items-center justify-center mx-auto text-[#6B6B6B]">
+          <div className="text-center py-20 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-lg mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-[#F3F3F1] dark:bg-[#1C1C1C] flex items-center justify-center mx-auto text-[#6B6B6B] dark:text-[#999999]">
               <Filter className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-[#111111]">No prompts found</h3>
-            <p className="text-xs text-[#6B6B6B]">
+            <h3 className="text-lg font-bold text-[#111111] dark:text-white">No prompts found</h3>
+            <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
               Try selecting another category, changing the AI model filter, or explore our trending collection.
             </p>
             <button
@@ -180,7 +170,7 @@ export default function HomePage() {
                 setSelectedCategory("All");
                 setSelectedModel("All");
               }}
-              className="px-5 py-2.5 rounded-full bg-[#111111] text-white text-xs font-semibold hover:bg-[#2A2A2A] transition-colors"
+              className="px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold hover:bg-[#2A2A2A] dark:hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
