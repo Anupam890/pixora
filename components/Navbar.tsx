@@ -9,7 +9,6 @@ import {
   Sparkles,
   Lock,
   Unlock,
-  Shield,
   Menu,
   X,
   Compass,
@@ -135,15 +134,6 @@ export function Navbar() {
             <span>{isProUser ? "PRO ACTIVE" : "GET PRO"}</span>
           </button>
 
-          {/* Admin Link */}
-          <Link
-            href="/admin"
-            className="p-2 rounded-full text-[#6B6B6B] hover:text-[#111111] hover:bg-[#F3F3F1] transition-colors"
-            title="Admin Dashboard"
-          >
-            <Shield className="w-4 h-4" />
-          </Link>
-
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -205,14 +195,6 @@ export function Navbar() {
               <span className="text-xs bg-[#F3F3F1] px-2 py-0.5 rounded-full font-semibold">
                 {unlockedPromptIds.size}
               </span>
-            </Link>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#111111] hover:bg-[#F3F3F1]"
-            >
-              <Shield className="w-4 h-4 text-[#6B6B6B]" />
-              <span>Admin Console</span>
             </Link>
           </nav>
 

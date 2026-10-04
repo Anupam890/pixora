@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Shield,
   Plus,
@@ -24,9 +25,23 @@ import {
   Sliders,
   X,
   Check,
+  Lock,
+  Key,
+  Copy,
+  LogOut,
+  Database,
 } from "lucide-react";
-import { PromptItem, CategoryType, AIModelType, StyleType, AspectRatioType, AnalyticsSummary, UserReport } from "@/lib/types";
+import {
+  PromptItem,
+  CategoryType,
+  AIModelType,
+  StyleType,
+  AspectRatioType,
+  AnalyticsSummary,
+  UserReport,
+} from "@/lib/types";
 import { usePixora } from "@/lib/context/PixoraContext";
+import { isDeveloperKeyValid, SUPABASE_CONFIG } from "@/lib/supabase";
 
 const CATEGORIES: CategoryType[] = [
   "Fashion",
@@ -52,8 +67,20 @@ const AI_MODELS: AIModelType[] = [
   "Leonardo",
 ];
 
-export default function AdminPage() {
+function AdminDashboardContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { addToast } = usePixora();
+
+  // Developer URL Authentication
+  const urlKey = searchParams.get("key") || searchParams.get("secret") || searchParams.get("token");
+  const isDevFlag = searchParams.get("dev") === "true";
+
+  const [isAuthorizedDev, setIsAuthorizedDev] = useState<boolean>(false);
+  const [manualKeyInput, setManualKeyInput] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Dashboard Data
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
   const [reports, setReports] = useState<UserReport[]>([]);
@@ -83,6 +110,20 @@ export default function AdminPage() {
   const [formTrending, setFormTrending] = useState(false);
   const [formPublished, setFormPublished] = useState(true);
 
+  // Check URL Key & Local Session on mount
+  useEffect(() => {
+    const savedDevAuth = localStorage.getItem("pixora_dev_authenticated");
+
+    if (isDeveloperKeyValid(urlKey) || isDevFlag || savedDevAuth === "true") {
+      setIsAuthorizedDev(true);
+      localStorage.setItem("pixora_dev_authenticated", "true");
+      fetchAdminData();
+    } else {
+      setIsAuthorizedDev(false);
+      setLoading(false);
+    }
+  }, [urlKey, isDevFlag]);
+
   const fetchAdminData = async () => {
     setLoading(true);
     try {
@@ -100,9 +141,32 @@ export default function AdminPage() {
     }
   };
 
-  useEffect(() => {
-    fetchAdminData();
-  }, []);
+  const handleManualAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isDeveloperKeyValid(manualKeyInput)) {
+      setIsAuthorizedDev(true);
+      localStorage.setItem("pixora_dev_authenticated", "true");
+      setAuthError(null);
+      addToast("Developer Authenticated", "Full access granted via Secret Key.");
+      fetchAdminData();
+    } else {
+      setAuthError("Invalid access key. Please check your developer URL or key.");
+    }
+  };
+
+  const handleRevokeAuth = () => {
+    localStorage.removeItem("pixora_dev_authenticated");
+    setIsAuthorizedDev(false);
+    addToast("Developer Session Ended", "Dashboard is locked.", "info");
+    router.push("/");
+  };
+
+  const copySecretUrl = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+    const secretUrl = `${origin}/admin?key=pixora_dev_resqvbekntvuvmxkuyvm`;
+    navigator.clipboard.writeText(secretUrl);
+    addToast("URL Copied to Clipboard!", "Bookmark this private URL for 1-click access.");
+  };
 
   const openCreateModal = () => {
     setEditingPrompt(null);
@@ -255,18 +319,116 @@ export default function AdminPage() {
       p.aiModel.toLowerCase().includes(searchTable.toLowerCase())
   );
 
+  // If Not Authorized: Discreet Developer Access Gate
+  if (!isAuthorizedDev) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8E8E5] shadow-xl space-y-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[#111111] text-white flex items-center justify-center mx-auto shadow-sm">
+            <Lock className="w-7 h-7" />
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-[#111111]">Developer Access Verification</h2>
+            <p className="text-xs text-[#6B6B6B] leading-relaxed">
+              This area is restricted to developers. To unlock access, enter your developer secret key or visit using your private URL.
+            </p>
+          </div>
+
+          {authError && (
+            <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+              {authError}
+            </p>
+          )}
+
+          <form onSubmit={handleManualAuth} className="space-y-4">
+            <div className="space-y-1 text-left">
+              <label className="text-xs font-semibold text-[#111111]">Developer Key / Passcode</label>
+              <div className="relative">
+                <Key className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  placeholder="Enter secret key or use your URL"
+                  value={manualKeyInput}
+                  onChange={(e) => setManualKeyInput(e.target.value)}
+                  className="w-full bg-[#FAFAF9] border border-[#E8E8E5] rounded-xl pl-9 pr-3 py-2.5 text-xs text-[#111111] focus:outline-none focus:border-[#6D5DFB]"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl bg-[#111111] hover:bg-[#2A2A2A] text-white text-xs font-semibold transition-colors"
+            >
+              Verify Developer Key
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-[#F3F3F1] flex items-center justify-between text-xs text-[#6B6B6B]">
+            <Link href="/" className="hover:text-[#111111] transition-colors">
+              ← Return to Home
+            </Link>
+            <span className="text-[11px] text-[#999999] font-mono">
+              Ref: {SUPABASE_CONFIG.projectRef}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Developer Authorized View
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {/* Admin Title Bar */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Developer Private Mode Header Banner */}
+      <div className="bg-[#111111] text-white p-4 sm:p-5 rounded-2xl border border-[#222222] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+            <Database className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-white">Developer Mode Active</h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Connected: {SUPABASE_CONFIG.projectRef}
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-400">
+              Accessed via secret URL. Hidden completely from normal customer UI.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={copySecretUrl}
+            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            title="Copy your private 1-click access URL"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span>Copy Secret URL</span>
+          </button>
+
+          <button
+            onClick={handleRevokeAuth}
+            className="px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            title="Exit and lock developer console"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Lock</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Admin Title Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#111111] text-white text-xs font-bold uppercase tracking-wider">
-            <Shield className="w-3.5 h-3.5 text-[#6D5DFB]" />
-            <span>Admin Control Center</span>
-          </div>
           <h1 className="text-3xl font-extrabold text-[#111111] tracking-tight">
             Pixora Catalog & Operations
           </h1>
+          <p className="text-xs text-[#6B6B6B]">
+            Manage prompt blueprints, view real-time monetization analytics, and review reports.
+          </p>
         </div>
 
         <button
@@ -278,16 +440,14 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* KPI Stat Cards (Section 21) */}
+      {/* KPI Stat Cards */}
       {analytics && (
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
           <div className="p-4 rounded-2xl bg-white border border-[#E8E8E5] space-y-1">
             <span className="text-[11px] font-bold text-[#6B6B6B] uppercase tracking-wider block">
               Total Prompts
             </span>
-            <p className="text-2xl font-extrabold text-[#111111]">
-              {analytics.totalPrompts}
-            </p>
+            <p className="text-2xl font-extrabold text-[#111111]">{analytics.totalPrompts}</p>
             <span className="text-[10px] text-emerald-600 font-medium">
               {analytics.publishedPrompts} Published
             </span>
@@ -390,10 +550,9 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Tab 1: Prompt Catalog Table (Section 22) */}
+      {/* Tab 1: Prompt Catalog Table */}
       {activeTab === "prompts" && (
         <div className="bg-white rounded-3xl border border-[#E8E8E5] overflow-hidden shadow-xs space-y-4 p-5">
-          {/* Table Search & Filter */}
           <div className="flex items-center justify-between gap-4">
             <div className="relative max-w-sm w-full">
               <Search className="w-4 h-4 text-[#999999] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -411,7 +570,6 @@ export default function AdminPage() {
             </span>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-[#FAFAF9] text-[#6B6B6B] uppercase font-bold text-[10px] tracking-wider border-y border-[#E8E8E5]">
@@ -496,7 +654,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tab 2: Analytics & Models Breakdown (Section 25) */}
+      {/* Tab 2: Analytics */}
       {activeTab === "analytics" && analytics && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="p-6 bg-white rounded-3xl border border-[#E8E8E5] space-y-4">
@@ -541,7 +699,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tab 3: Reports Moderation Inbox (Section 34) */}
+      {/* Tab 3: Reports */}
       {activeTab === "reports" && (
         <div className="bg-white rounded-3xl border border-[#E8E8E5] p-6 space-y-4">
           <h3 className="font-bold text-base text-[#111111]">Community Feedback & Reports</h3>
@@ -601,7 +759,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Create / Edit Prompt Modal (Section 23) */}
+      {/* Create / Edit Prompt Modal */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200"
@@ -672,7 +830,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Complete Prompt Text (The Secret) */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#111111] flex items-center justify-between">
                   <span>Complete AI Prompt (Locked Blueprint)</span>
@@ -769,7 +926,6 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Toggles */}
               <div className="flex flex-wrap items-center gap-6 pt-2">
                 <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer">
                   <input
@@ -822,5 +978,19 @@ export default function AdminPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[50vh] flex items-center justify-center text-xs text-[#6B6B6B]">
+          Verifying developer session...
+        </div>
+      }
+    >
+      <AdminDashboardContent />
+    </Suspense>
   );
 }

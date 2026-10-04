@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Heart } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { usePixora } from "@/lib/context/PixoraContext";
 
 export function Footer() {
@@ -103,7 +103,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Platform & Legal */}
+          {/* Platform */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111]">Platform</h4>
             <ul className="space-y-2 text-sm text-[#6B6B6B]">
@@ -127,11 +127,6 @@ export function Footer() {
                   Unlock History
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-[#111111] transition-colors">
-                  Admin Dashboard
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -145,9 +140,6 @@ export function Footer() {
             </Link>
             <Link href="/" className="hover:text-[#111111] transition-colors">
               Terms of Service
-            </Link>
-            <Link href="/admin" className="hover:text-[#111111] transition-colors">
-              Admin Portal
             </Link>
           </div>
         </div>
