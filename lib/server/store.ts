@@ -149,7 +149,7 @@ function loadStateFromDisk(): {
 // In-memory persistent singleton for the Next.js server instance
 const globalForPixora = globalThis as unknown as { pixoraState?: GlobalState };
 
-if (!globalForPixora.pixoraState) {
+if (!globalForPixora.pixoraState || !globalForPixora.pixoraState.submissions) {
   const loaded = loadStateFromDisk();
   globalForPixora.pixoraState = {
     prompts: loaded.prompts,
@@ -165,6 +165,9 @@ const state = globalForPixora.pixoraState;
 function persist() {
   saveStateToDisk(state.prompts, state.submissions, state.reports);
 }
+
+// Immediate initial sync
+persist();
 
 /**
  * Strips confidential prompt text from a prompt item unless unlocked
