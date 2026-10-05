@@ -61,22 +61,22 @@ export default function CollectionsPage() {
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white transition-colors mb-2 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#554D74] dark:text-[#A59ECA] hover:text-[#8B5CF6] dark:hover:text-[#22D3EE] transition-colors mb-2 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Discovery</span>
           </Link>
-          <h1 className="text-3xl font-extrabold text-[#111111] dark:text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 dark:from-white dark:via-purple-100 dark:to-cyan-200 bg-clip-text text-transparent">
             Curated Collections
           </h1>
-          <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
+          <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
             Organize your prompt discoveries into custom creative moodboards.
           </p>
         </div>
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111111] dark:bg-white hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-white dark:text-[#111111] text-xs font-semibold shadow-xs transition-colors self-start cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all self-start cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>New Collection</span>
@@ -84,7 +84,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Collections Tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-[#E8E8E5] dark:border-[#222222] pb-2">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-purple-200/50 dark:border-[#8B5CF6]/20 pb-3">
         {collections.map((col) => {
           const isSelected = col.id === activeCollection?.id;
           return (
@@ -93,8 +93,8 @@ export default function CollectionsPage() {
               onClick={() => setSelectedColId(col.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
                 isSelected
-                  ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111] shadow-xs"
-                  : "bg-white dark:bg-[#141414] hover:bg-[#F3F3F1] dark:hover:bg-[#1C1C1C] text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white border border-[#E8E8E5] dark:border-[#262626]"
+                  ? "bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-md shadow-purple-500/30"
+                  : "bg-white dark:bg-[#150F2E] hover:bg-purple-50 dark:hover:bg-[#1D153E] text-[#554D74] dark:text-[#A59ECA] hover:text-[#1C143B] dark:hover:text-white border border-purple-200/50 dark:border-[#8B5CF6]/20"
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -102,8 +102,8 @@ export default function CollectionsPage() {
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                   isSelected
-                    ? "bg-white/20 dark:bg-black/20 text-white dark:text-[#111111]"
-                    : "bg-[#F3F3F1] dark:bg-[#1F1F1F] text-[#6B6B6B] dark:text-[#999999]"
+                    ? "bg-white/20 text-white"
+                    : "bg-purple-100 dark:bg-[#090714] text-[#8B5CF6] dark:text-[#22D3EE]"
                 }`}
               >
                 {col.promptIds.length}
@@ -116,14 +116,14 @@ export default function CollectionsPage() {
       {/* Collection Details & Items */}
       {activeCollection && (
         <div className="space-y-6">
-          <div className="p-6 bg-white dark:bg-[#141414] rounded-2xl border border-[#E8E8E5] dark:border-[#222222] flex items-center justify-between">
+          <div className="p-6 bg-white dark:bg-[#150F2E] rounded-2xl border border-purple-200/50 dark:border-[#8B5CF6]/30 flex items-center justify-between shadow-md shadow-purple-950/10">
             <div>
-              <h2 className="text-xl font-bold text-[#111111] dark:text-white">{activeCollection.name}</h2>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
+              <h2 className="text-xl font-bold text-[#1C143B] dark:text-white">{activeCollection.name}</h2>
+              <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
                 {activeCollection.description || "Curated list of AI prompts"}
               </p>
             </div>
-            <span className="text-xs font-medium text-[#999999] dark:text-[#666666]">
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 dark:bg-[#090714] text-[#8B5CF6] dark:text-[#22D3EE] border border-[#8B5CF6]/20">
               {collectionPrompts.length} Prompts saved
             </span>
           </div>
@@ -135,7 +135,7 @@ export default function CollectionsPage() {
                   <PromptCard prompt={p} />
                   <button
                     onClick={() => removeFromCollection(activeCollection.id, p.id)}
-                    className="absolute top-4 right-14 z-20 p-2 rounded-full bg-white/90 dark:bg-black/80 hover:bg-red-50 dark:hover:bg-red-950/60 text-gray-500 hover:text-red-600 shadow-sm opacity-0 group-hover/colitem:opacity-100 transition-opacity cursor-pointer"
+                    className="absolute top-4 right-14 z-20 p-2 rounded-full bg-[#150F2E]/90 hover:bg-red-500/20 text-[#A59ECA] hover:text-red-400 shadow-md border border-[#8B5CF6]/30 opacity-0 group-hover/colitem:opacity-100 transition-all cursor-pointer backdrop-blur-md"
                     title="Remove from collection"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -144,15 +144,15 @@ export default function CollectionsPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-3 max-w-md mx-auto">
-              <Layers className="w-8 h-8 text-[#999999] dark:text-[#666666] mx-auto" />
-              <h4 className="font-bold text-sm text-[#111111] dark:text-white">This collection is empty</h4>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
+            <div className="text-center py-16 bg-white dark:bg-[#150F2E] rounded-3xl border border-purple-200/50 dark:border-[#8B5CF6]/30 p-8 space-y-3 max-w-md mx-auto shadow-xl shadow-purple-950/20">
+              <Layers className="w-8 h-8 text-[#8B5CF6] dark:text-[#22D3EE] mx-auto opacity-70" />
+              <h4 className="font-bold text-sm text-[#1C143B] dark:text-white">This collection is empty</h4>
+              <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
                 Browse prompts in the gallery and click "Save to Collection" to populate this moodboard.
               </p>
               <Link
                 href="/"
-                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold cursor-pointer"
+                className="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
               >
                 Discover Prompts
               </Link>
@@ -164,18 +164,18 @@ export default function CollectionsPage() {
       {/* Create Collection Modal */}
       {isCreateModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in-0 duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090714]/80 backdrop-blur-md animate-in fade-in-0 duration-200"
           onClick={() => setIsCreateModalOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white dark:bg-[#141414] rounded-3xl p-6 shadow-2xl border border-[#E8E8E5] dark:border-[#262626] space-y-5"
+            className="w-full max-w-md bg-[#150F2E] rounded-3xl p-6 shadow-2xl shadow-purple-950/60 border border-[#8B5CF6]/30 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-lg text-[#111111] dark:text-white">Create New Collection</h3>
+              <h3 className="font-bold text-lg text-white">Create New Collection</h3>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+                className="p-1.5 rounded-xl text-[#A59ECA] hover:text-white hover:bg-[#8B5CF6]/20 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -183,25 +183,25 @@ export default function CollectionsPage() {
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#111111] dark:text-[#EDEDED]">Collection Name</label>
+                <label className="text-xs font-semibold text-[#A59ECA]">Collection Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Cyberpunk Aesthetics, Luxury Cosmetics"
                   value={newColName}
                   onChange={(e) => setNewColName(e.target.value)}
-                  className="w-full bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl px-3 py-2 text-xs text-[#111111] dark:text-white focus:outline-none focus:border-[#6D5DFB]"
+                  className="w-full bg-[#0F0C20] border border-[#8B5CF6]/30 rounded-xl px-3 py-2 text-xs text-white placeholder-[#554D74] focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#111111] dark:text-[#EDEDED]">Description (optional)</label>
+                <label className="text-xs font-semibold text-[#A59ECA]">Description (optional)</label>
                 <textarea
                   rows={2}
                   placeholder="What is this collection for?"
                   value={newColDesc}
                   onChange={(e) => setNewColDesc(e.target.value)}
-                  className="w-full bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#2C2C2C] rounded-xl p-3 text-xs text-[#111111] dark:text-white focus:outline-none focus:border-[#6D5DFB]"
+                  className="w-full bg-[#0F0C20] border border-[#8B5CF6]/30 rounded-xl p-3 text-xs text-white placeholder-[#554D74] focus:outline-none focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]"
                 />
               </div>
 
@@ -209,13 +209,13 @@ export default function CollectionsPage() {
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-gray-500 hover:bg-[#F3F3F1] dark:hover:bg-[#1C1C1C] cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-[#A59ECA] hover:bg-[#8B5CF6]/15 hover:text-white transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#111111] dark:bg-white hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-white dark:text-[#111111] text-xs font-semibold cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
                 >
                   Create Collection
                 </button>

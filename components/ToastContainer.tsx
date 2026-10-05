@@ -19,18 +19,18 @@ export function ToastContainer() {
         return (
           <div
             key={toast.id}
-            className="pointer-events-auto flex items-start gap-3 p-4 rounded-2xl bg-[#111111] text-white shadow-xl border border-[#2A2A2A] animate-in slide-in-from-bottom-3 duration-200"
+            className="pointer-events-auto flex items-start gap-3 p-4 rounded-2xl bg-[#150F2E] text-[#F3F0FF] shadow-2xl shadow-purple-950/50 border border-[#8B5CF6]/30 backdrop-blur-xl animate-in slide-in-from-bottom-3 duration-200"
           >
             <div className="shrink-0 mt-0.5">
-              {isSuccess && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-              {isInfo && <Info className="w-4 h-4 text-[#6D5DFB]" />}
+              {isSuccess && <CheckCircle2 className="w-4 h-4 text-[#22D3EE]" />}
+              {isInfo && <Info className="w-4 h-4 text-[#8B5CF6]" />}
               {isWarning && <AlertTriangle className="w-4 h-4 text-amber-400" />}
             </div>
 
             <div className="flex-1 min-w-0">
               <h5 className="text-xs font-semibold text-white">{toast.title}</h5>
               {toast.description && (
-                <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">
+                <p className="text-[11px] text-[#A59ECA] mt-0.5 leading-snug">
                   {toast.description}
                 </p>
               )}
@@ -38,7 +38,7 @@ export function ToastContainer() {
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="shrink-0 p-1 rounded-lg text-gray-500 hover:text-white transition-colors"
+              className="shrink-0 p-1 rounded-lg text-[#A59ECA] hover:text-white hover:bg-[#8B5CF6]/20 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>

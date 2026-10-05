@@ -4,31 +4,38 @@
 
 @layer base {
   :root {
-    --bg-primary: #FAFAF9;
-    --bg-secondary: #F3F3F1;
+    /* Cosmic Lavender Mist (Light Mode) */
+    --bg-primary: #F6F4FE;
+    --bg-secondary: #ECE8FB;
     --bg-card: #FFFFFF;
-    --text-primary: #111111;
-    --text-secondary: #6B6B6B;
-    --text-muted: #999999;
-    --accent: #6D5DFB;
-    --accent-hover: #5947F5;
-    --accent-light: #F0EEFF;
-    --border-subtle: #E8E8E5;
-    --border-hover: #D5D5D0;
+    --bg-card-hover: #F8F6FF;
+    --text-primary: #1C143B;
+    --text-secondary: #584F7C;
+    --text-muted: #8A81AC;
+    --accent: #7C3AED;
+    --accent-hover: #6D28D9;
+    --accent-light: #EDE9FE;
+    --accent-cyan: #0891B2;
+    --border-subtle: #DDD6FE;
+    --border-hover: #C4B5FD;
   }
 
   .dark {
-    --bg-primary: #0C0C0C;
-    --bg-secondary: #161616;
-    --bg-card: #131313;
-    --text-primary: #EDEDED;
-    --text-secondary: #9E9E9E;
-    --text-muted: #666666;
-    --accent: #6D5DFB;
-    --accent-hover: #7E70FF;
-    --accent-light: #201D38;
-    --border-subtle: #222222;
-    --border-hover: #333333;
+    /* Deep Cosmic Midnight Violet & Cyan (Dark Mode) */
+    --bg-primary: #090714;
+    --bg-secondary: #100C22;
+    --bg-card: #150F2E;
+    --bg-card-hover: #1D163F;
+    --text-primary: #F3F0FF;
+    --text-secondary: #A59ECA;
+    --text-muted: #726A99;
+    --accent: #8B5CF6;
+    --accent-hover: #A78BFA;
+    --accent-light: #241A4C;
+    --accent-cyan: #06B6D4;
+    --accent-cyan-hover: #22D3EE;
+    --border-subtle: #271E4C;
+    --border-hover: #3E3073;
   }
 
   body {
@@ -38,10 +45,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar with cosmic violet accent */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -50,17 +57,17 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #D5D5D0;
+    background: #C4B5FD;
     border-radius: 9999px;
   }
   .dark ::-webkit-scrollbar-thumb {
-    background: #333333;
+    background: #2E2356;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #AFAFA8;
+    background: #A78BFA;
   }
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: #444444;
+    background: #4A398A;
   }
 }
 
@@ -73,25 +80,25 @@
   scrollbar-width: none;
 }
 
-/* Glass effect */
+/* Glass effect with cosmic glow */
 .glass-panel {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(139, 92, 246, 0.15);
 }
 .dark .glass-panel {
-  background: rgba(19, 19, 19, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(21, 15, 46, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
 .glass-dark {
-  background: rgba(17, 17, 17, 0.90);
+  background: rgba(16, 12, 34, 0.90);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
 /* Masonry layout */
@@ -120,7 +127,7 @@
   margin-bottom: 1.25rem;
 }
 
-/* Subtle Shimmer for skeletons */
+/* Subtle Shimmer for skeletons with cosmic violet tint */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -131,12 +138,12 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #F3F3F1 25%, #EBEBE7 50%, #F3F3F1 75%);
+  background: linear-gradient(90deg, #ECE8FB 25%, #DDD6FE 50%, #ECE8FB 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite ease-in-out;
 }
 .dark .animate-shimmer {
-  background: linear-gradient(90deg, #181818 25%, #222222 50%, #181818 75%);
+  background: linear-gradient(90deg, #150F2E 25%, #271E4C 50%, #150F2E 75%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite ease-in-out;
 }

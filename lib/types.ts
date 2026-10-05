@@ -116,18 +116,44 @@ export interface UserReport {
   status: "pending" | "reviewed" | "dismissed";
 }
 
+export interface CommunitySubmission {
+  id: string;
+  title: string;
+  promptText: string;
+  description?: string;
+  imageUrl: string;
+  category: CategoryType;
+  aiModel: AIModelType;
+  style: StyleType;
+  aspectRatio: AspectRatioType;
+  tags: string[];
+  parameters?: PromptParameters;
+  author: PromptAuthor;
+  userEmail?: string;
+  notes?: string;
+  status: "pending" | "approved" | "rejected";
+  rejectionReason?: string;
+  createdAt: string;
+  reviewedAt?: string;
+}
+
 export interface AnalyticsSummary {
   totalPrompts: number;
   publishedPrompts: number;
-  totalUnlocks: number;
-  todayUnlocks: number;
+  pendingSubmissions: number;
+  totalSubmissions: number;
   totalViews: number;
   totalFavorites: number;
+  totalReports: number;
   totalUsers: number;
-  unlockConversionRate: number;
-  adCompletionRate: number;
-  estimatedRevenueUsd: number;
   topCategories: { category: CategoryType; count: number }[];
-  topModels: { model: AIModelType; unlocks: number }[];
-  recentUnlocks: { promptTitle: string; model: AIModelType; timestamp: string }[];
+  topModels: { model: AIModelType; count: number }[];
+  recentActivity: { title: string; type: "submission" | "published" | "report"; timestamp: string }[];
+  // Legacy optional properties for backward compatibility
+  totalUnlocks?: number;
+  todayUnlocks?: number;
+  unlockConversionRate?: number;
+  adCompletionRate?: number;
+  estimatedRevenueUsd?: number;
+  recentUnlocks?: { promptTitle: string; model: AIModelType; timestamp: string }[];
 }

@@ -38,6 +38,10 @@ interface PixoraContextType {
   setActiveReportPrompt: (prompt: PromptItem | null) => void;
   isProModalOpen: boolean;
   setIsProModalOpen: (open: boolean) => void;
+  isSubmitModalOpen: boolean;
+  setIsSubmitModalOpen: (open: boolean) => void;
+  userSubmissions: string[];
+  recordSubmission: (submissionId: string) => void;
 }
 
 const PixoraContext = createContext<PixoraContextType | undefined>(undefined);
@@ -50,10 +54,11 @@ const LOCAL_STORAGE_KEYS = {
   COLLECTIONS: "pixora_collections",
   PRO_STATUS: "pixora_is_pro",
   THEME: "pixora_theme",
+  SUBMISSIONS: "pixora_user_submissions",
 };
 
 export function PixoraProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [userToken, setUserToken] = useState<string>("");
   const [unlockedPromptIds, setUnlockedPromptIds] = useState<Set<string>>(new Set());
   const [unlockedPromptsMap, setUnlockedPromptsMap] = useState<Record<string, string>>({});
@@ -64,18 +69,20 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
   const [activeSharePrompt, setActiveSharePrompt] = useState<PromptItem | null>(null);
   const [activeReportPrompt, setActiveReportPrompt] = useState<PromptItem | null>(null);
   const [isProModalOpen, setIsProModalOpen] = useState<boolean>(false);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
+  const [userSubmissions, setUserSubmissions] = useState<string[]>([]);
 
   // Initialize from LocalStorage & System Theme
   useEffect(() => {
     try {
       // Theme
       const savedTheme = localStorage.getItem(LOCAL_STORAGE_KEYS.THEME) as "light" | "dark" | null;
-      if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-        setTheme("dark");
-        document.documentElement.classList.add("dark");
-      } else {
+      if (savedTheme === "light") {
         setTheme("light");
         document.documentElement.classList.remove("dark");
+      } else {
+        setTheme("dark");
+        document.documentElement.classList.add("dark");
       }
 
       // User Token
@@ -136,10 +143,24 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
       if (savedPro === "true") {
         setIsProUser(true);
       }
+
+      // User Submissions
+      const savedSubs = localStorage.getItem(LOCAL_STORAGE_KEYS.SUBMISSIONS);
+      if (savedSubs) {
+        setUserSubmissions(JSON.parse(savedSubs));
+      }
     } catch (e) {
       console.warn("Local storage initialization failed", e);
     }
   }, []);
+
+  const recordSubmission = (submissionId: string) => {
+    setUserSubmissions((prev) => {
+      const next = [submissionId, ...prev];
+      localStorage.setItem(LOCAL_STORAGE_KEYS.SUBMISSIONS, JSON.stringify(next));
+      return next;
+    });
+  };
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
@@ -319,6 +340,10 @@ export function PixoraProvider({ children }: { children: React.ReactNode }) {
         setActiveReportPrompt,
         isProModalOpen,
         setIsProModalOpen,
+        isSubmitModalOpen,
+        setIsSubmitModalOpen,
+        userSubmissions,
+        recordSubmission,
       }}
     >
       {children}

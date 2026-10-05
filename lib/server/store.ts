@@ -1,40 +1,173 @@
-import { PromptItem, CategoryType, AIModelType, StyleType, SortOptionType, UserReport, AnalyticsSummary } from "../types";
+import fs from "fs";
+import path from "path";
+import {
+  PromptItem,
+  CategoryType,
+  AIModelType,
+  SortOptionType,
+  UserReport,
+  AnalyticsSummary,
+  CommunitySubmission,
+} from "../types";
 import { INITIAL_PROMPTS } from "../data/prompts";
 
-// In-memory persistent singleton for the Next.js server instance
+// File path for database persistence
+const DB_FILE_PATH = path.join(process.cwd(), "lib", "data", "pixora-db.json");
+
 interface GlobalState {
   prompts: PromptItem[];
-  unlockedTokens: Map<string, Set<string>>; // token -> Set of unlocked prompt IDs
+  submissions: CommunitySubmission[];
   reports: UserReport[];
+  unlockedTokens: Map<string, Set<string>>; // token -> Set of unlocked prompt IDs
   adSessions: Map<string, { promptId: string; completed: boolean; createdAt: number }>;
 }
 
+const INITIAL_SUBMISSIONS: CommunitySubmission[] = [
+  {
+    id: "sub-101",
+    title: "Ethereal Glass Butterfly in Bioluminescent Moss",
+    promptText:
+      "Macro photography of a translucent crystal glass butterfly resting on glowing bioluminescent emerald moss, misty morning dew droplets, prismatic rainbow refraction, soft focus bokeh background, 100mm f/2.8 macro lens --ar 16:9 --style raw --v 6.1 --stylize 280",
+    description: "Intricate macro concept featuring crystal transparency and nature caustics.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=85",
+    category: "Photography",
+    aiModel: "Midjourney",
+    style: "Photorealistic",
+    aspectRatio: "16:9",
+    tags: ["macro", "butterfly", "crystal", "bioluminescence", "dew"],
+    parameters: {
+      version: "v 6.1",
+      stylize: 280,
+      chaos: 10,
+      cfgScale: 7.0,
+      rawMode: true,
+      negativePrompt: "lowres, plastic, blurry, oversaturated, deformed",
+    },
+    author: {
+      name: "Aria Thorne",
+      handle: "@ariathorne",
+      avatar:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80",
+      isVerified: true,
+    },
+    userEmail: "aria.thorne@example.com",
+    notes: "Tested extensively in Midjourney v6.1; renders exceptionally crisp crystal refraction.",
+    status: "pending",
+    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+  },
+  {
+    id: "sub-102",
+    title: "Retro 80s Anime Synthwave Horizon",
+    promptText:
+      "Vintage 1988 retro anime aesthetic screencap of an aesthetic sports car driving towards a gigantic digital wireframe sun on a purple neon grid highway, starry twilight sky, VHS cassette scanlines, grain texture, cel animation by Studio Gainax --ar 16:9 --v 6.1",
+    description: "Outrun and synthwave nostalgia with authentic 1980s cel-shaded rendering.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1200&q=85",
+    category: "Anime",
+    aiModel: "Midjourney",
+    style: "Vintage",
+    aspectRatio: "16:9",
+    tags: ["synthwave", "retro", "anime", "80s", "outrun", "cyberpunk"],
+    parameters: {
+      version: "v 6.1",
+      stylize: 200,
+      negativePrompt: "3d render, photorealistic, modern digital art",
+    },
+    author: {
+      name: "Leo Vance",
+      handle: "@vancerecord",
+      avatar:
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+      isVerified: false,
+    },
+    userEmail: "leo@vancestudios.design",
+    status: "pending",
+    createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+  },
+];
+
+const INITIAL_REPORTS: UserReport[] = [
+  {
+    id: "rep-001",
+    promptId: "px-003",
+    promptTitle: "Minimalist Luxury Perfume in Water Ripple",
+    reason: "incorrect_prompt",
+    details: "Midjourney v6.1 parameter needs double dashes for raw mode.",
+    userEmail: "creator@example.com",
+    createdAt: "2026-10-02T11:20:00Z",
+    status: "reviewed",
+  },
+];
+
+// Helper to save state to disk
+function saveStateToDisk(prompts: PromptItem[], submissions: CommunitySubmission[], reports: UserReport[]) {
+  try {
+    const dir = path.dirname(DB_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const data = JSON.stringify({ prompts, submissions, reports }, null, 2);
+    fs.writeFileSync(DB_FILE_PATH, data, "utf8");
+  } catch (err) {
+    console.error("Failed to write pixora-db.json:", err);
+  }
+}
+
+// Helper to load state from disk
+function loadStateFromDisk(): {
+  prompts: PromptItem[];
+  submissions: CommunitySubmission[];
+  reports: UserReport[];
+} {
+  try {
+    if (fs.existsSync(DB_FILE_PATH)) {
+      const raw = fs.readFileSync(DB_FILE_PATH, "utf8");
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.prompts)) {
+        return {
+          prompts: parsed.prompts,
+          submissions: Array.isArray(parsed.submissions) ? parsed.submissions : [...INITIAL_SUBMISSIONS],
+          reports: Array.isArray(parsed.reports) ? parsed.reports : [...INITIAL_REPORTS],
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load pixora-db.json, falling back to initial data:", err);
+  }
+
+  // First boot: create file
+  const initial = {
+    prompts: [...INITIAL_PROMPTS],
+    submissions: [...INITIAL_SUBMISSIONS],
+    reports: [...INITIAL_REPORTS],
+  };
+  saveStateToDisk(initial.prompts, initial.submissions, initial.reports);
+  return initial;
+}
+
+// In-memory persistent singleton for the Next.js server instance
 const globalForPixora = globalThis as unknown as { pixoraState?: GlobalState };
 
 if (!globalForPixora.pixoraState) {
+  const loaded = loadStateFromDisk();
   globalForPixora.pixoraState = {
-    prompts: [...INITIAL_PROMPTS],
+    prompts: loaded.prompts,
+    submissions: loaded.submissions,
+    reports: loaded.reports,
     unlockedTokens: new Map(),
-    reports: [
-      {
-        id: "rep-001",
-        promptId: "px-003",
-        promptTitle: "Minimalist Luxury Perfume in Water Ripple",
-        reason: "incorrect_prompt",
-        details: "Midjourney v6.1 parameter needs double dashes for raw mode.",
-        userEmail: "creator@example.com",
-        createdAt: "2026-10-02T11:20:00Z",
-        status: "reviewed",
-      },
-    ],
     adSessions: new Map(),
   };
 }
 
 const state = globalForPixora.pixoraState;
 
+function persist() {
+  saveStateToDisk(state.prompts, state.submissions, state.reports);
+}
+
 /**
- * Strips confidential prompt text from a prompt item
+ * Strips confidential prompt text from a prompt item unless unlocked
  */
 export function sanitizePublicPrompt(prompt: PromptItem, isUnlocked = false): PromptItem {
   if (isUnlocked) {
@@ -104,7 +237,7 @@ export function getAllPublicPrompts(options?: {
     if (sort === "most-saved") return b.favoriteCount - a.favoriteCount;
     if (sort === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     // Default: trending
-    return b.unlockCount * 2 + b.favoriteCount - (a.unlockCount * 2 + a.favoriteCount);
+    return b.favoriteCount * 2 + b.viewCount - (a.favoriteCount * 2 + a.viewCount);
   });
 
   const unlockedSet = options?.unlockToken ? state.unlockedTokens.get(options.unlockToken) : null;
@@ -118,6 +251,7 @@ export function getPromptBySlug(slug: string, unlockToken?: string): PromptItem 
 
   // Increment view count
   prompt.viewCount += 1;
+  persist();
 
   const isUnlocked = Boolean(
     unlockToken && state.unlockedTokens.get(unlockToken)?.has(prompt.id)
@@ -164,6 +298,7 @@ export function unlockPromptWithSession(
 
   // Increment unlock counter
   prompt.unlockCount += 1;
+  persist();
 
   // Generate or reuse token
   const token = userToken || "usr_tok_" + Math.random().toString(36).substring(2, 12);
@@ -188,6 +323,7 @@ export function toggleFavorite(promptId: string, increment: boolean): number {
   const prompt = state.prompts.find((p) => p.id === promptId);
   if (!prompt) return 0;
   prompt.favoriteCount = Math.max(0, prompt.favoriteCount + (increment ? 1 : -1));
+  persist();
   return prompt.favoriteCount;
 }
 
@@ -199,6 +335,7 @@ export function createReport(report: Omit<UserReport, "id" | "createdAt" | "stat
     status: "pending",
   };
   state.reports.unshift(newReport);
+  persist();
   return newReport;
 }
 
@@ -208,9 +345,105 @@ export function getReports(): UserReport[] {
 
 export function updateReportStatus(reportId: string, status: "pending" | "reviewed" | "dismissed") {
   const r = state.reports.find((x) => x.id === reportId);
-  if (r) r.status = status;
+  if (r) {
+    r.status = status;
+    persist();
+  }
 }
 
+// -------------------------------------------------------------
+// COMMUNITY SUBMISSIONS
+// -------------------------------------------------------------
+export function createCommunitySubmission(
+  sub: Omit<CommunitySubmission, "id" | "createdAt" | "status">
+): CommunitySubmission {
+  const newSubmission: CommunitySubmission = {
+    ...sub,
+    id: "sub-" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  };
+
+  state.submissions.unshift(newSubmission);
+  persist();
+  return newSubmission;
+}
+
+export function getAllCommunitySubmissions(): CommunitySubmission[] {
+  return state.submissions;
+}
+
+export function getPendingCommunitySubmissions(): CommunitySubmission[] {
+  return state.submissions.filter((s) => s.status === "pending");
+}
+
+export function approveCommunitySubmission(
+  submissionId: string,
+  overrides?: Partial<PromptItem>
+): { prompt: PromptItem; submission: CommunitySubmission } | null {
+  const sub = state.submissions.find((s) => s.id === submissionId);
+  if (!sub) return null;
+
+  sub.status = "approved";
+  sub.reviewedAt = new Date().toISOString();
+
+  // Convert submission into a live PromptItem in the catalog
+  const id = "px-" + String(state.prompts.length + 1).padStart(3, "0");
+  const slug =
+    (overrides?.slug || sub.title)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") +
+    "-" +
+    Math.random().toString(36).substring(2, 6);
+
+  const newPrompt: PromptItem = {
+    id,
+    title: overrides?.title || sub.title,
+    slug,
+    description: overrides?.description || sub.description || "A community-curated AI prompt on Pixora.",
+    imageUrl: overrides?.imageUrl || sub.imageUrl,
+    category: overrides?.category || sub.category,
+    aiModel: overrides?.aiModel || sub.aiModel,
+    style: overrides?.style || sub.style,
+    aspectRatio: overrides?.aspectRatio || sub.aspectRatio,
+    tags: overrides?.tags || sub.tags,
+    parameters: overrides?.parameters || sub.parameters || { version: "v 6.1" },
+    author: overrides?.author || sub.author,
+    isFeatured: Boolean(overrides?.isFeatured),
+    isTrending: true,
+    isPublished: true,
+    viewCount: 0,
+    unlockCount: 0,
+    favoriteCount: 0,
+    createdAt: new Date().toISOString(),
+    promptText: overrides?.promptText || sub.promptText,
+  };
+
+  state.prompts.unshift(newPrompt);
+  persist();
+
+  return { prompt: newPrompt, submission: sub };
+}
+
+export function rejectCommunitySubmission(
+  submissionId: string,
+  reason?: string
+): CommunitySubmission | null {
+  const sub = state.submissions.find((s) => s.id === submissionId);
+  if (!sub) return null;
+
+  sub.status = "rejected";
+  sub.rejectionReason = reason || "Does not meet community aesthetic or formatting standards.";
+  sub.reviewedAt = new Date().toISOString();
+  persist();
+
+  return sub;
+}
+
+// -------------------------------------------------------------
+// ADMIN CRUD & DATABASE BACKUP / IMPORT
+// -------------------------------------------------------------
 export function adminGetAllPrompts(): PromptItem[] {
   return state.prompts;
 }
@@ -223,20 +456,28 @@ export function adminSavePrompt(data: Partial<PromptItem> & { title: string; pro
         ...state.prompts[idx],
         ...data,
       };
+      persist();
       return state.prompts[idx];
     }
   }
 
-  // Create new
+  // Create new prompt
   const id = "px-" + String(state.prompts.length + 1).padStart(3, "0");
-  const slug = data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const slug =
+    data.slug ||
+    data.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
   const newPrompt: PromptItem = {
     id,
     title: data.title,
     slug,
     description: data.description || "A curated AI prompt on Pixora.",
-    imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=85",
+    imageUrl:
+      data.imageUrl ||
+      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=85",
     category: data.category || "Art",
     aiModel: data.aiModel || "Midjourney",
     style: data.style || "Photorealistic",
@@ -246,7 +487,8 @@ export function adminSavePrompt(data: Partial<PromptItem> & { title: string; pro
     author: data.author || {
       name: "Pixora Studio",
       handle: "@pixorastudio",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+      avatar:
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
       isVerified: true,
     },
     isFeatured: Boolean(data.isFeatured),
@@ -260,21 +502,65 @@ export function adminSavePrompt(data: Partial<PromptItem> & { title: string; pro
   };
 
   state.prompts.unshift(newPrompt);
+  persist();
   return newPrompt;
 }
 
 export function adminDeletePrompt(id: string): boolean {
   const initialLength = state.prompts.length;
   state.prompts = state.prompts.filter((p) => p.id !== id);
-  return state.prompts.length < initialLength;
+  const changed = state.prompts.length < initialLength;
+  if (changed) persist();
+  return changed;
+}
+
+export function exportFullDatabase(): {
+  prompts: PromptItem[];
+  submissions: CommunitySubmission[];
+  reports: UserReport[];
+  exportedAt: string;
+} {
+  return {
+    prompts: state.prompts,
+    submissions: state.submissions,
+    reports: state.reports,
+    exportedAt: new Date().toISOString(),
+  };
+}
+
+export function importFullDatabase(imported: {
+  prompts?: PromptItem[];
+  submissions?: CommunitySubmission[];
+  reports?: UserReport[];
+}): { success: boolean; importedPrompts: number; importedSubmissions: number } {
+  if (!imported || !Array.isArray(imported.prompts)) {
+    return { success: false, importedPrompts: 0, importedSubmissions: 0 };
+  }
+
+  state.prompts = imported.prompts;
+  if (Array.isArray(imported.submissions)) {
+    state.submissions = imported.submissions;
+  }
+  if (Array.isArray(imported.reports)) {
+    state.reports = imported.reports;
+  }
+
+  persist();
+  return {
+    success: true,
+    importedPrompts: state.prompts.length,
+    importedSubmissions: state.submissions.length,
+  };
 }
 
 export function getAnalytics(): AnalyticsSummary {
   const totalPrompts = state.prompts.length;
   const publishedPrompts = state.prompts.filter((p) => p.isPublished).length;
-  const totalUnlocks = state.prompts.reduce((acc, p) => acc + p.unlockCount, 0);
+  const pendingSubmissions = state.submissions.filter((s) => s.status === "pending").length;
+  const totalSubmissions = state.submissions.length;
   const totalViews = state.prompts.reduce((acc, p) => acc + p.viewCount, 0);
   const totalFavorites = state.prompts.reduce((acc, p) => acc + p.favoriteCount, 0);
+  const totalReports = state.reports.length;
 
   // Categories breakdown
   const categoryMap = new Map<CategoryType, number>();
@@ -282,7 +568,7 @@ export function getAnalytics(): AnalyticsSummary {
 
   state.prompts.forEach((p) => {
     categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
-    modelMap.set(p.aiModel, (modelMap.get(p.aiModel) || 0) + p.unlockCount);
+    modelMap.set(p.aiModel, (modelMap.get(p.aiModel) || 0) + 1);
   });
 
   const topCategories = Array.from(categoryMap.entries())
@@ -290,32 +576,38 @@ export function getAnalytics(): AnalyticsSummary {
     .sort((a, b) => b.count - a.count);
 
   const topModels = Array.from(modelMap.entries())
-    .map(([model, unlocks]) => ({ model, unlocks }))
-    .sort((a, b) => b.unlocks - a.unlocks);
+    .map(([model, count]) => ({ model, count }))
+    .sort((a, b) => b.count - a.count);
 
-  // Conversion rate: unlocks / views
-  const unlockConversionRate = totalViews > 0 ? Number(((totalUnlocks / totalViews) * 100).toFixed(1)) : 27.4;
-  // Estimated rewarded ad eCPM ($18.50 per 1000 completed ads)
-  const estimatedRevenueUsd = Number(((totalUnlocks * 18.5) / 1000).toFixed(2));
+  const recentActivity: { title: string; type: "submission" | "published" | "report"; timestamp: string }[] = [];
+
+  state.submissions.slice(0, 3).forEach((s) => {
+    recentActivity.push({
+      title: `Submission: "${s.title}" (${s.status})`,
+      type: "submission",
+      timestamp: s.createdAt,
+    });
+  });
+
+  state.prompts.slice(0, 3).forEach((p) => {
+    recentActivity.push({
+      title: `Prompt: "${p.title}"`,
+      type: "published",
+      timestamp: p.createdAt,
+    });
+  });
 
   return {
     totalPrompts,
     publishedPrompts,
-    totalUnlocks,
-    todayUnlocks: Math.floor(totalUnlocks * 0.08),
+    pendingSubmissions,
+    totalSubmissions,
     totalViews,
     totalFavorites,
+    totalReports,
     totalUsers: 8940,
-    unlockConversionRate,
-    adCompletionRate: 94.2,
-    estimatedRevenueUsd,
     topCategories,
     topModels,
-    recentUnlocks: [
-      { promptTitle: "Cinematic Haute Couture Portrait", model: "Midjourney", timestamp: "2 mins ago" },
-      { promptTitle: "Neon Cyberpunk Alley Rain Reflection", model: "Flux", timestamp: "5 mins ago" },
-      { promptTitle: "Minimalist Luxury Perfume in Water Ripple", model: "Midjourney", timestamp: "8 mins ago" },
-      { promptTitle: "Mechanical Swiss Chronograph Movement", model: "Stable Diffusion", timestamp: "12 mins ago" },
-    ],
+    recentActivity,
   };
 }

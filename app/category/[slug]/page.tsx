@@ -88,21 +88,21 @@ export default function CategoryPage({
       <div>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white transition-colors mb-6 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#554D74] dark:text-[#A59ECA] hover:text-[#8B5CF6] dark:hover:text-[#22D3EE] transition-colors mb-6 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to All Categories</span>
         </Link>
 
         <div className="space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#262626] text-xs font-bold uppercase tracking-wider text-[#6D5DFB]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-[#150F2E] border border-[#8B5CF6]/30 text-xs font-bold uppercase tracking-wider text-[#8B5CF6] dark:text-[#22D3EE]">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Category Collection</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#111111] dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 dark:from-white dark:via-purple-100 dark:to-cyan-200 bg-clip-text text-transparent">
             {meta.title}
           </h1>
-          <p className="text-sm sm:text-base text-[#6B6B6B] dark:text-[#9E9E9E] leading-relaxed">
+          <p className="text-sm sm:text-base text-[#554D74] dark:text-[#A59ECA] leading-relaxed">
             {meta.desc}
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function CategoryPage({
       {loading ? (
         <div className="masonry-grid">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="masonry-item rounded-2xl bg-white dark:bg-[#141414] p-3 space-y-3 border border-[#E8E8E5] dark:border-[#222222]">
+            <div key={i} className="masonry-item rounded-2xl bg-white dark:bg-[#150F2E] p-3 space-y-3 border border-purple-200/50 dark:border-[#8B5CF6]/20">
               <div className="w-full h-64 rounded-xl animate-shimmer" />
             </div>
           ))}
@@ -130,13 +130,13 @@ export default function CategoryPage({
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-3 max-w-md mx-auto">
-          <Filter className="w-8 h-8 text-[#999999] dark:text-[#666666] mx-auto" />
-          <h3 className="font-bold text-sm text-[#111111] dark:text-white">No prompts in this category yet</h3>
-          <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">Check back shortly or explore our trending collection.</p>
+        <div className="text-center py-16 bg-white dark:bg-[#150F2E] rounded-3xl border border-purple-200/50 dark:border-[#8B5CF6]/30 p-8 space-y-3 max-w-md mx-auto shadow-xl shadow-purple-950/20">
+          <Filter className="w-8 h-8 text-[#8B5CF6] dark:text-[#22D3EE] mx-auto opacity-70" />
+          <h3 className="font-bold text-sm text-[#1C143B] dark:text-white">No prompts in this category yet</h3>
+          <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">Check back shortly or explore our trending collection.</p>
           <Link
             href="/"
-            className="inline-block px-4 py-2 bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold rounded-full cursor-pointer"
+            className="inline-block px-5 py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold rounded-full shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
           >
             Explore Trending
           </Link>

@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ShareModal } from "@/components/ShareModal";
 import { ReportModal } from "@/components/ReportModal";
 import { ProModal } from "@/components/ProModal";
+import { SubmitPromptModal } from "@/components/SubmitPromptModal";
 import { ToastContainer } from "@/components/ToastContainer";
 
 const geistSans = Geist({
@@ -51,7 +52,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#FAFAF9] text-[#111111] selection:bg-[#6D5DFB] selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#F6F4FE] dark:bg-[#090714] text-[#1C143B] dark:text-[#F3F0FF] selection:bg-[#8B5CF6] selection:text-white transition-colors duration-200">
         <PixoraProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
@@ -61,6 +62,7 @@ export default function RootLayout({
           <ShareModal />
           <ReportModal />
           <ProModal />
+          <SubmitPromptModal />
           <ToastContainer />
         </PixoraProvider>
       </body>

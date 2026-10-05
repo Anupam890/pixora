@@ -40,20 +40,20 @@ export default function FavoritesPage() {
       <div>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white transition-colors mb-2 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#554D74] dark:text-[#A59ECA] hover:text-[#8B5CF6] dark:hover:text-[#22D3EE] transition-colors mb-2 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Discovery</span>
         </Link>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-500 flex items-center justify-center">
-            <Heart className="w-5 h-5 fill-red-500" />
+          <div className="w-10 h-10 rounded-2xl bg-pink-500/10 dark:bg-pink-500/20 text-pink-500 border border-pink-500/30 flex items-center justify-center">
+            <Heart className="w-5 h-5 fill-pink-500" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-[#111111] dark:text-white tracking-tight">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-500 dark:from-white dark:via-purple-100 dark:to-pink-300 bg-clip-text text-transparent">
               Saved Favorites
             </h1>
-            <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
+            <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
               {favoritePrompts.length} prompts bookmarked in your personal library.
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function FavoritesPage() {
       {loading ? (
         <div className="masonry-grid">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="masonry-item rounded-2xl bg-white dark:bg-[#141414] p-3 space-y-3 border border-[#E8E8E5] dark:border-[#222222]">
+            <div key={i} className="masonry-item rounded-2xl bg-white dark:bg-[#150F2E] p-3 space-y-3 border border-purple-200/50 dark:border-[#8B5CF6]/20">
               <div className="w-full h-64 rounded-xl animate-shimmer" />
             </div>
           ))}
@@ -82,17 +82,17 @@ export default function FavoritesPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-md mx-auto">
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-500 flex items-center justify-center mx-auto">
-            <Heart className="w-7 h-7" />
+        <div className="text-center py-20 bg-white dark:bg-[#150F2E] rounded-3xl border border-purple-200/50 dark:border-[#8B5CF6]/30 p-8 space-y-4 max-w-md mx-auto shadow-xl shadow-purple-950/20">
+          <div className="w-14 h-14 rounded-2xl bg-pink-500/10 dark:bg-pink-500/20 text-pink-500 border border-pink-500/30 flex items-center justify-center mx-auto">
+            <Heart className="w-7 h-7 fill-pink-500" />
           </div>
-          <h3 className="text-base font-bold text-[#111111] dark:text-white">No favorites yet</h3>
-          <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
+          <h3 className="text-base font-bold text-[#1C143B] dark:text-white">No favorites yet</h3>
+          <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
             Tap the heart icon on any prompt card while exploring to keep track of your favorite visuals.
           </p>
           <Link
             href="/"
-            className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold hover:bg-[#2A2A2A] dark:hover:bg-gray-100 transition-colors cursor-pointer"
+            className="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
           >
             Explore Prompts
           </Link>

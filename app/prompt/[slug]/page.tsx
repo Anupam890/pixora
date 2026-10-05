@@ -106,11 +106,11 @@ export default function PromptDetailPage({
   if (!prompt) {
     return (
       <div className="max-w-md mx-auto text-center py-20 px-4 space-y-4">
-        <h2 className="text-2xl font-bold text-[#111111] dark:text-white">Prompt Not Found</h2>
-        <p className="text-sm text-[#6B6B6B] dark:text-[#999999]">The prompt you are looking for does not exist or has been removed.</p>
+        <h2 className="text-2xl font-bold text-[#1C143B] dark:text-[#F3F0FF]">Prompt Not Found</h2>
+        <p className="text-sm text-[#584F7C] dark:text-[#A59ECA]">The prompt you are looking for does not exist or has been removed.</p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] hover:opacity-95 text-white text-xs font-semibold shadow-md shadow-[#8B5CF6]/25"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Explore</span>
@@ -132,7 +132,7 @@ export default function PromptDetailPage({
       <div>
         <button
           onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#584F7C] dark:text-[#A59ECA] hover:text-[#7C3AED] dark:hover:text-[#22D3EE] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Library</span>
@@ -143,7 +143,7 @@ export default function PromptDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column: Visual Showcase */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="relative w-full rounded-3xl overflow-hidden bg-[#F3F3F1] dark:bg-[#1A1A1A] border border-[#E8E8E5] dark:border-[#242424] shadow-sm">
+          <div className="relative w-full rounded-3xl overflow-hidden bg-[#ECE8FB] dark:bg-[#120D26] border border-[#DDD6FE]/70 dark:border-[#271E4C] shadow-lg shadow-[#8B5CF6]/5">
             <div className="relative aspect-[4/5] sm:aspect-auto sm:min-h-[580px] w-full">
               <Image
                 src={prompt.imageUrl}
@@ -161,8 +161,8 @@ export default function PromptDetailPage({
                 onClick={() => toggleFavorite(prompt.id, prompt.slug)}
                 className={`p-3 rounded-full backdrop-blur-md shadow-md transition-all active:scale-95 cursor-pointer ${
                   isFavorite(prompt.id)
-                    ? "bg-red-50 dark:bg-red-950/80 text-red-600"
-                    : "bg-white/90 dark:bg-black/75 hover:bg-white dark:hover:bg-black text-[#111111] dark:text-white"
+                    ? "bg-red-50 dark:bg-red-950/80 text-red-500"
+                    : "bg-white/90 dark:bg-[#161133]/90 hover:bg-white dark:hover:bg-[#1F1746] text-[#1C143B] dark:text-[#F3F0FF]"
                 }`}
                 title="Favorite"
               >
@@ -171,7 +171,7 @@ export default function PromptDetailPage({
 
               <button
                 onClick={() => setActiveSharePrompt(prompt)}
-                className="p-3 rounded-full bg-white/90 dark:bg-black/75 hover:bg-white dark:hover:bg-black text-[#111111] dark:text-white backdrop-blur-md shadow-md transition-all active:scale-95 cursor-pointer"
+                className="p-3 rounded-full bg-white/90 dark:bg-[#161133]/90 hover:bg-white dark:hover:bg-[#1F1746] text-[#1C143B] dark:text-[#F3F0FF] backdrop-blur-md shadow-md transition-all active:scale-95 cursor-pointer"
                 title="Share"
               >
                 <Share2 className="w-5 h-5" />
@@ -180,42 +180,42 @@ export default function PromptDetailPage({
 
             {/* Model Badge Overlay */}
             <div className="absolute bottom-4 left-4 flex items-center gap-2">
-              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md text-white border border-white/10">
+              <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#090714]/80 backdrop-blur-md text-[#F3F0FF] border border-white/10">
                 {prompt.aiModel}
               </span>
-              <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/85 dark:bg-black/75 backdrop-blur-md text-[#111111] dark:text-white">
+              <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/90 dark:bg-[#161133]/90 backdrop-blur-md text-[#1C143B] dark:text-[#F3F0FF]">
                 Ratio {prompt.aspectRatio}
               </span>
             </div>
           </div>
 
           {/* Author & Creator Bar */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#242424]">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-[#150F2E] border border-[#DDD6FE]/70 dark:border-[#271E4C] shadow-sm">
             <div className="flex items-center gap-3">
               <img
                 src={prompt.author.avatar}
                 alt={prompt.author.name}
-                className="w-10 h-10 rounded-full object-cover border border-[#E8E8E5] dark:border-[#282828]"
+                className="w-10 h-10 rounded-full object-cover border border-[#DDD6FE] dark:border-[#2E245B]"
               />
               <div>
-                <p className="text-xs font-bold text-[#111111] dark:text-white flex items-center gap-1">
+                <p className="text-xs font-bold text-[#1C143B] dark:text-[#F3F0FF] flex items-center gap-1">
                   <span>{prompt.author.name}</span>
                   {prompt.author.isVerified && (
-                    <CheckCircle className="w-3.5 h-3.5 text-[#6D5DFB] fill-[#6D5DFB]/10" />
+                    <CheckCircle className="w-3.5 h-3.5 text-[#8B5CF6] fill-[#8B5CF6]/20" />
                   )}
                 </p>
-                <p className="text-[11px] text-[#6B6B6B] dark:text-[#888888]">{prompt.author.handle}</p>
+                <p className="text-[11px] text-[#584F7C] dark:text-[#A59ECA]">{prompt.author.handle}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-[#6B6B6B] dark:text-[#888888]">
+            <div className="flex items-center gap-4 text-xs text-[#584F7C] dark:text-[#A59ECA]">
               <span className="flex items-center gap-1">
-                <Eye className="w-3.5 h-3.5 text-[#999999] dark:text-[#666666]" />
+                <Eye className="w-3.5 h-3.5 text-[#8A81AC] dark:text-[#726A99]" />
                 {prompt.viewCount.toLocaleString()} views
               </span>
               <button
                 onClick={() => setActiveReportPrompt(prompt)}
-                className="hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                className="hover:text-red-500 transition-colors flex items-center gap-1 cursor-pointer"
                 title="Report issue"
               >
                 <Flag className="w-3.5 h-3.5" />
@@ -231,23 +231,23 @@ export default function PromptDetailPage({
             <div className="flex items-center gap-2">
               <Link
                 href={`/category/${prompt.category.toLowerCase()}`}
-                className="text-xs font-semibold px-3 py-1 rounded-full bg-[#F3F3F1] dark:bg-[#1C1C1C] hover:bg-[#EBEBE7] dark:hover:bg-[#252525] text-[#111111] dark:text-white transition-colors"
+                className="text-xs font-semibold px-3 py-1 rounded-full bg-[#EDE9FE] dark:bg-[#201844] hover:bg-[#DDD6FE] dark:hover:bg-[#281E54] text-[#7C3AED] dark:text-[#A78BFA] transition-colors"
               >
                 {prompt.category}
               </Link>
               <Link
                 href={`/ai/${prompt.aiModel.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-xs font-semibold px-3 py-1 rounded-full bg-[#EBEBE7] dark:bg-[#222222] hover:bg-[#D5D5D0] dark:hover:bg-[#2A2A2A] text-[#111111] dark:text-white transition-colors"
+                className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E0F2FE] dark:bg-[#0E2838] hover:bg-[#BAE6FD] dark:hover:bg-[#13384F] text-[#0284C7] dark:text-[#38BDF8] transition-colors"
               >
                 {prompt.aiModel}
               </Link>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111111] dark:text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1C143B] dark:text-[#F3F0FF] tracking-tight leading-tight">
               {prompt.title}
             </h1>
 
-            <p className="text-sm text-[#6B6B6B] dark:text-[#A0A0A0] leading-relaxed">
+            <p className="text-sm text-[#584F7C] dark:text-[#A59ECA] leading-relaxed">
               {prompt.description}
             </p>
           </div>
@@ -256,12 +256,13 @@ export default function PromptDetailPage({
           {unlocked && promptTextToShow ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#6D5DFB] flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8B5CF6] dark:text-[#22D3EE] flex items-center gap-1.5">
                   <Unlock className="w-4 h-4" />
-                  <span>Prompt Unlocked & Ready</span>
+                  <span>Prompt Blueprint Unlocked</span>
                 </span>
-                <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">
-                  {prompt.unlockCount.toLocaleString()} creators unlocked
+                <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  <span>Ready to Copy</span>
                 </span>
               </div>
 
@@ -270,16 +271,16 @@ export default function PromptDetailPage({
             </div>
           ) : (
             /* Locked Prompt State */
-            <div className="rounded-3xl border-2 border-dashed border-[#D5D5D0] dark:border-[#2C2C2C] bg-white dark:bg-[#141414] p-6 sm:p-8 text-center space-y-6 shadow-xs">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-xs">
+            <div className="rounded-3xl border-2 border-dashed border-[#DDD6FE] dark:border-[#382B6B] bg-white dark:bg-[#150F2E] p-6 sm:p-8 text-center space-y-6 shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-500 flex items-center justify-center mx-auto shadow-xs">
                 <Lock className="w-7 h-7" />
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-[#111111] dark:text-white">
+                <h3 className="text-xl font-bold text-[#1C143B] dark:text-[#F3F0FF]">
                   Complete Prompt is Locked
                 </h3>
-                <p className="text-xs sm:text-sm text-[#6B6B6B] dark:text-[#9E9E9E] max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#584F7C] dark:text-[#A59ECA] max-w-sm mx-auto leading-relaxed">
                   Watch a short 5-second sponsor advertisement to reveal the complete prompt, stylize weights, negative prompt, and seeds.
                 </p>
               </div>
@@ -287,20 +288,20 @@ export default function PromptDetailPage({
               <div className="pt-2 space-y-2">
                 <button
                   onClick={() => setIsUnlockModalOpen(true)}
-                  className="w-full py-4 px-6 rounded-2xl bg-[#111111] dark:bg-white hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-white dark:text-[#111111] font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] hover:opacity-95 text-white font-semibold text-sm shadow-md shadow-[#8B5CF6]/30 transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  <Lock className="w-4 h-4 text-amber-400 dark:text-amber-600 group-hover:scale-110 transition-transform" />
+                  <Lock className="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform" />
                   <span>Watch Ad to Unlock Prompt</span>
                 </button>
-                <p className="text-[11px] text-[#999999] dark:text-[#666666]">Takes only 5 seconds · Free access</p>
+                <p className="text-[11px] text-[#8A81AC] dark:text-[#726A99]">Takes only 5 seconds · Free access</p>
               </div>
             </div>
           )}
 
           {/* Tags Section */}
           <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#6B6B6B] dark:text-[#888888] flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5" />
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#7C3AED] dark:text-[#A78BFA] flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-[#8B5CF6]" />
               <span>Prompt Keywords & Tags</span>
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -308,7 +309,7 @@ export default function PromptDetailPage({
                 <Link
                   key={tag}
                   href={`/search?q=${encodeURIComponent(tag)}`}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[#141414] hover:bg-[#F3F3F1] dark:hover:bg-[#1E1E1E] text-[#6B6B6B] dark:text-[#A0A0A0] hover:text-[#111111] dark:hover:text-white border border-[#E8E8E5] dark:border-[#262626] transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-[#161133] hover:bg-[#EDE9FE] dark:hover:bg-[#201844] text-[#584F7C] dark:text-[#A59ECA] hover:text-[#7C3AED] dark:hover:text-[#22D3EE] border border-[#DDD6FE] dark:border-[#2E245B] transition-colors"
                 >
                   #{tag}
                 </Link>
@@ -320,15 +321,15 @@ export default function PromptDetailPage({
 
       {/* Related Prompts Section */}
       {relatedPrompts.length > 0 && (
-        <section className="space-y-6 pt-10 border-t border-[#E8E8E5] dark:border-[#222222]">
+        <section className="space-y-6 pt-10 border-t border-[#DDD6FE]/70 dark:border-[#271E4C]/80">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-[#111111] dark:text-white">Similar & Related Prompts</h3>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">Explore more from the {prompt.category} collection.</p>
+              <h3 className="text-xl font-bold text-[#1C143B] dark:text-[#F3F0FF]">Similar & Related Prompts</h3>
+              <p className="text-xs text-[#584F7C] dark:text-[#A59ECA]">Explore more from the {prompt.category} collection.</p>
             </div>
             <Link
               href={`/category/${prompt.category.toLowerCase()}`}
-              className="text-xs font-semibold text-[#6D5DFB] hover:underline"
+              className="text-xs font-semibold text-[#8B5CF6] dark:text-[#22D3EE] hover:underline"
             >
               View all in {prompt.category} →
             </Link>

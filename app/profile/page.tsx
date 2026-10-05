@@ -2,48 +2,56 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   User,
   Heart,
-  Unlock,
   Layers,
   Settings,
   Sparkles,
   ArrowRight,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Plus,
 } from "lucide-react";
 import { usePixora } from "@/lib/context/PixoraContext";
-import { PromptItem } from "@/lib/types";
+import { PromptItem, CommunitySubmission } from "@/lib/types";
 import { PromptCard } from "@/components/PromptCard";
-import { AdUnlockModal } from "@/components/AdUnlockModal";
 
 export default function ProfilePage() {
   const {
-    unlockedPromptIds,
     favorites,
     collections,
     isProUser,
-    toggleProUser,
     setIsProModalOpen,
+    setIsSubmitModalOpen,
     userToken,
   } = usePixora();
 
-  const [activeTab, setActiveTab] = useState<"unlocks" | "favorites" | "collections" | "settings">("unlocks");
-  const [unlockedPrompts, setUnlockedPrompts] = useState<PromptItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"favorites" | "collections" | "submissions" | "settings">("favorites");
   const [favoritePrompts, setFavoritePrompts] = useState<PromptItem[]>([]);
+  const [submissions, setSubmissions] = useState<CommunitySubmission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unlockTargetPrompt, setUnlockTargetPrompt] = useState<PromptItem | null>(null);
-  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchUserPrompts() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/prompts?token=${userToken}`);
-        const data = await res.json();
-        if (data.success) {
-          const all: PromptItem[] = data.prompts;
-          setUnlockedPrompts(all.filter((p) => unlockedPromptIds.has(p.id)));
+        const [promptsRes, subsRes] = await Promise.all([
+          fetch(`/api/prompts?token=${userToken}`),
+          fetch(`/api/submissions`),
+        ]);
+
+        const promptsData = await promptsRes.json();
+        if (promptsData.success) {
+          const all: PromptItem[] = promptsData.prompts;
           setFavoritePrompts(all.filter((p) => favorites.has(p.id)));
+        }
+
+        const subsData = await subsRes.json();
+        if (subsData.success) {
+          setSubmissions(subsData.submissions || []);
         }
       } catch (e) {
         console.error(e);
@@ -53,28 +61,28 @@ export default function ProfilePage() {
     }
 
     fetchUserPrompts();
-  }, [unlockedPromptIds, favorites, userToken]);
+  }, [favorites, userToken]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Profile Header */}
-      <div className="bg-white dark:bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] dark:border-[#222222] flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#150F2E] rounded-3xl p-6 sm:p-8 border border-purple-200/50 dark:border-[#8B5CF6]/30 shadow-xl shadow-purple-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] flex items-center justify-center font-bold text-2xl shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#8B5CF6] to-[#06B6D4] text-white flex items-center justify-center font-bold text-2xl shadow-lg shadow-purple-500/30">
             <User className="w-8 h-8" />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#111111] dark:text-white">
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 dark:from-white dark:via-purple-100 dark:to-cyan-200 bg-clip-text text-transparent">
                 Creator Studio
               </h1>
               {isProUser && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40">
                   PRO
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#6B6B6B] dark:text-[#888888] font-mono">
+            <p className="text-xs text-[#554D74] dark:text-[#A59ECA] font-mono">
               Session ID: {userToken || "guest_session"}
             </p>
           </div>
@@ -82,35 +90,31 @@ export default function ProfilePage() {
 
         <div className="flex flex-wrap items-center gap-3">
           <button
+            onClick={() => setIsSubmitModalOpen(true)}
+            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Submit a Prompt</span>
+          </button>
+
+          <button
             onClick={() => setIsProModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+            className="px-4 py-2.5 rounded-full bg-white dark:bg-[#1E1744] border border-[#DDD6FE] dark:border-[#382670] text-xs font-semibold text-[#1C143B] dark:text-white flex items-center gap-2 hover:bg-[#EDE9FE] dark:hover:bg-[#251A55] transition-colors cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>{isProUser ? "Manage Pro" : "Upgrade to Pro"}</span>
+            <span>{isProUser ? "Manage Pro" : "Upgrade Pro"}</span>
           </button>
         </div>
       </div>
 
       {/* Profile Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E8E8E5] dark:border-[#222222] pb-2 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => setActiveTab("unlocks")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
-            activeTab === "unlocks"
-              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
-              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
-          }`}
-        >
-          <Unlock className="w-4 h-4" />
-          <span>Unlocked History ({unlockedPromptIds.size})</span>
-        </button>
-
+      <div className="flex items-center gap-2 border-b border-purple-200/50 dark:border-[#8B5CF6]/20 pb-3 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab("favorites")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === "favorites"
-              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
-              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
+              ? "bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-md shadow-purple-500/30"
+              : "text-[#554D74] dark:text-[#A59ECA] hover:text-[#1C143B] dark:hover:text-white hover:bg-purple-50 dark:hover:bg-[#150F2E]"
           }`}
         >
           <Heart className="w-4 h-4" />
@@ -119,10 +123,10 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setActiveTab("collections")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === "collections"
-              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
-              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
+              ? "bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-md shadow-purple-500/30"
+              : "text-[#554D74] dark:text-[#A59ECA] hover:text-[#1C143B] dark:hover:text-white hover:bg-purple-50 dark:hover:bg-[#150F2E]"
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -130,11 +134,23 @@ export default function ProfilePage() {
         </button>
 
         <button
+          onClick={() => setActiveTab("submissions")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
+            activeTab === "submissions"
+              ? "bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-md shadow-purple-500/30"
+              : "text-[#554D74] dark:text-[#A59ECA] hover:text-[#1C143B] dark:hover:text-white hover:bg-purple-50 dark:hover:bg-[#150F2E]"
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Community Submissions ({submissions.length})</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors shrink-0 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === "settings"
-              ? "bg-[#111111] dark:bg-white text-white dark:text-[#111111]"
-              : "text-[#6B6B6B] dark:text-[#999999] hover:text-[#111111] dark:hover:text-white hover:bg-[#F3F3F1] dark:hover:bg-[#1A1A1A]"
+              ? "bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-md shadow-purple-500/30"
+              : "text-[#554D74] dark:text-[#A59ECA] hover:text-[#1C143B] dark:hover:text-white hover:bg-purple-50 dark:hover:bg-[#150F2E]"
           }`}
         >
           <Settings className="w-4 h-4" />
@@ -142,111 +158,88 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Tab 1: Unlocks History */}
-      {activeTab === "unlocks" && (
+      {/* Tab 1: Saved Favorites */}
+      {activeTab === "favorites" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#111111] dark:text-white">Prompts You Have Unlocked</h3>
-            <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">Always available without re-watching ads</span>
+            <h3 className="text-base font-bold text-[#1C143B] dark:text-white">Saved Inspiration</h3>
+            <span className="text-xs text-[#554D74] dark:text-[#A59ECA]">
+              {favoritePrompts.length} bookmarked {favoritePrompts.length === 1 ? "prompt" : "prompts"}
+            </span>
           </div>
 
-          {unlockedPrompts.length > 0 ? (
-            <div className="masonry-grid">
-              {unlockedPrompts.map((p) => (
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="aspect-[4/5] rounded-3xl animate-shimmer" />
+              ))}
+            </div>
+          ) : favoritePrompts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {favoritePrompts.map((p) => (
                 <PromptCard key={p.id} prompt={p} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-md mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-[#F3F3F1] dark:bg-[#1C1C1C] flex items-center justify-center mx-auto text-[#6B6B6B] dark:text-[#999999]">
-                <Unlock className="w-6 h-6" />
+            <div className="text-center py-16 bg-white dark:bg-[#150F2E] rounded-3xl border border-purple-200/50 dark:border-[#8B5CF6]/30 p-8 space-y-4 max-w-md mx-auto shadow-xl shadow-purple-950/20">
+              <div className="w-12 h-12 rounded-2xl bg-pink-500/10 dark:bg-pink-500/20 text-pink-500 border border-pink-500/30 flex items-center justify-center mx-auto">
+                <Heart className="w-6 h-6 fill-pink-500" />
               </div>
-              <h4 className="font-bold text-sm text-[#111111] dark:text-white">No unlocked prompts yet</h4>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
-                When you unlock prompts by watching a 5-sec ad, they appear here permanently.
+              <h4 className="font-bold text-sm text-[#1C143B] dark:text-white">No favorites saved yet</h4>
+              <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
+                Tap the heart bookmark on any prompt visual to save it for your creative workflow.
               </p>
               <Link
                 href="/"
-                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold"
+                className="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all"
               >
-                Explore Prompts to Unlock
+                Explore Prompts
               </Link>
             </div>
           )}
         </div>
       )}
 
-      {/* Tab 2: Favorites */}
-      {activeTab === "favorites" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-[#111111] dark:text-white">Saved Favorites</h3>
-            <span className="text-xs text-[#6B6B6B] dark:text-[#888888]">Your bookmarked inspiration</span>
-          </div>
-
-          {favoritePrompts.length > 0 ? (
-            <div className="masonry-grid">
-              {favoritePrompts.map((p) => (
-                <PromptCard
-                  key={p.id}
-                  prompt={p}
-                  onQuickUnlock={(target) => {
-                    setUnlockTargetPrompt(target);
-                    setIsUnlockModalOpen(true);
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white dark:bg-[#141414] rounded-3xl border border-[#E8E8E5] dark:border-[#222222] p-8 space-y-4 max-w-md mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/60 text-red-500 flex items-center justify-center mx-auto">
-                <Heart className="w-6 h-6" />
-              </div>
-              <h4 className="font-bold text-sm text-[#111111] dark:text-white">No favorites saved yet</h4>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#999999]">
-                Tap the heart icon on any prompt card while browsing to save it here.
-              </p>
-              <Link
-                href="/"
-                className="inline-block px-5 py-2.5 rounded-full bg-[#111111] dark:bg-white text-white dark:text-[#111111] text-xs font-semibold"
-              >
-                Browse Gallery
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab 3: Collections */}
+      {/* Tab 2: Collections */}
       {activeTab === "collections" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[#111111] dark:text-white">Your Custom Collections</h3>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">Organize prompts by project, client, or visual style.</p>
-            </div>
+            <h3 className="text-base font-bold text-[#1C143B] dark:text-white">Creative Moodboards</h3>
             <Link
               href="/collections"
-              className="text-xs font-semibold text-[#6D5DFB] hover:underline"
+              className="text-xs font-semibold text-[#8B5CF6] dark:text-[#22D3EE] hover:underline"
             >
-              Open Collections Manager →
+              Open Collections Studio →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {collections.map((col) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {collections.map((c) => (
               <div
-                key={col.id}
-                className="p-5 rounded-2xl bg-white dark:bg-[#141414] border border-[#E8E8E5] dark:border-[#222222] space-y-3 hover:border-[#111111] dark:hover:border-white transition-all"
+                key={c.id}
+                className="bg-white dark:bg-[#150F2E] rounded-3xl p-6 border border-purple-200/50 dark:border-[#8B5CF6]/30 shadow-lg shadow-purple-950/15 space-y-4"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#111111] dark:text-white">{col.name}</span>
-                  <span className="text-[11px] text-[#999999] dark:text-[#666666]">{col.promptIds.length} items</span>
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-[#0F0C20] flex items-center justify-center text-[#8B5CF6] dark:text-[#22D3EE]">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#554D74] dark:text-[#A59ECA]">
+                    {c.promptIds.length} {c.promptIds.length === 1 ? "prompt" : "prompts"}
+                  </span>
                 </div>
-                <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">{col.description || "Custom curated prompts."}</p>
+
+                <div className="space-y-1">
+                  <h4 className="font-bold text-base text-[#1C143B] dark:text-white">{c.name}</h4>
+                  {c.description && (
+                    <p className="text-xs text-[#554D74] dark:text-[#A59ECA] line-clamp-2">
+                      {c.description}
+                    </p>
+                  )}
+                </div>
+
                 <Link
                   href="/collections"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#6D5DFB] hover:underline pt-2"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8B5CF6] dark:text-[#22D3EE] hover:underline pt-2"
                 >
                   <span>View Collection</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -257,43 +250,124 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Tab 3: Submissions */}
+      {activeTab === "submissions" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-[#1C143B] dark:text-white">Community Submissions</h3>
+              <p className="text-xs text-[#584F7C] dark:text-[#A59ECA]">
+                Track the moderation status of prompt blueprints you have submitted.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsSubmitModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-purple-500/25 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Submit Another</span>
+            </button>
+          </div>
+
+          {submissions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {submissions.map((sub) => (
+                <div
+                  key={sub.id}
+                  className="flex gap-4 p-4 rounded-2xl bg-white dark:bg-[#150F2E] border border-purple-200/50 dark:border-[#8B5CF6]/30 shadow-md"
+                >
+                  <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-purple-50 dark:bg-[#0F0C20] shrink-0 border border-[#DDD6FE] dark:border-[#2E245B]">
+                    <Image src={sub.imageUrl} alt={sub.title} fill className="object-cover" />
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-sm text-[#1C143B] dark:text-white line-clamp-1">
+                        {sub.title}
+                      </h4>
+
+                      {sub.status === "approved" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 shrink-0">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Approved</span>
+                        </span>
+                      ) : sub.status === "rejected" ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-500 border border-red-500/30 shrink-0">
+                          <XCircle className="w-3 h-3" />
+                          <span>Rejected</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30 shrink-0">
+                          <Clock className="w-3 h-3" />
+                          <span>In Review</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-xs font-mono text-[#554D74] dark:text-[#A59ECA] line-clamp-2">
+                      {sub.promptText}
+                    </p>
+
+                    <div className="flex items-center justify-between text-[11px] text-[#8A81AC] dark:text-[#726A99] pt-1">
+                      <span>{sub.aiModel} · {sub.category}</span>
+                      <span>{new Date(sub.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white dark:bg-[#150F2E] rounded-3xl border border-purple-200/50 dark:border-[#8B5CF6]/30 p-8 space-y-4 max-w-md mx-auto shadow-xl shadow-purple-950/20">
+              <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-[#0F0C20] flex items-center justify-center mx-auto text-[#8B5CF6] dark:text-[#22D3EE]">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h4 className="font-bold text-sm text-[#1C143B] dark:text-white">No submissions yet</h4>
+              <p className="text-xs text-[#554D74] dark:text-[#A59ECA]">
+                Have you generated a stunning image with Midjourney, Flux, or Stable Diffusion? Submit your prompt to get featured!
+              </p>
+              <button
+                onClick={() => setIsSubmitModalOpen(true)}
+                className="inline-block px-5 py-2.5 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-xs font-semibold shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/25 transition-all cursor-pointer"
+              >
+                Submit Your First Prompt
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Tab 4: Preferences */}
       {activeTab === "settings" && (
-        <div className="max-w-xl bg-white dark:bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#E8E8E5] dark:border-[#222222] space-y-6">
-          <h3 className="text-lg font-bold text-[#111111] dark:text-white">Account & Plan Settings</h3>
+        <div className="max-w-2xl bg-white dark:bg-[#150F2E] rounded-3xl p-6 sm:p-8 border border-purple-200/50 dark:border-[#8B5CF6]/30 shadow-xl shadow-purple-950/20 space-y-6">
+          <h3 className="text-base font-bold text-[#1C143B] dark:text-white">Account & Preferences</h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#262626]">
-              <div>
-                <h4 className="text-xs font-bold text-[#111111] dark:text-white">Pixora Pro Plan</h4>
-                <p className="text-[11px] text-[#6B6B6B] dark:text-[#888888]">
-                  {isProUser ? "Active — Enjoy ad-free instant unlocks" : "Free Plan — Ad-supported access"}
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-purple-50/50 dark:bg-[#0F0C20] border border-purple-200/30 dark:border-[#8B5CF6]/20">
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold text-[#1C143B] dark:text-white">Pixora Pro Membership</p>
+                <p className="text-[11px] text-[#554D74] dark:text-[#A59ECA]">
+                  {isProUser ? "Pro active with zero-ad instant prompt unlocks." : "Ad-supported free access mode."}
                 </p>
               </div>
               <button
-                onClick={toggleProUser}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#111111] dark:bg-white text-white dark:text-[#111111] hover:bg-[#2A2A2A] dark:hover:bg-gray-100 transition-colors cursor-pointer"
+                onClick={() => setIsProModalOpen(true)}
+                className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white shadow-xs cursor-pointer"
               >
-                {isProUser ? "Switch to Free" : "Upgrade to Pro"}
+                {isProUser ? "Manage" : "Upgrade"}
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#FAFAF9] dark:bg-[#1C1C1C] border border-[#E8E8E5] dark:border-[#262626] space-y-2">
-              <h4 className="text-xs font-bold text-[#111111] dark:text-white">Session Persistence</h4>
-              <p className="text-xs text-[#6B6B6B] dark:text-[#888888]">
-                Your unlocks and saved prompts are stored locally in this browser. To sync across devices, Supabase Auth connects instantly.
-              </p>
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-purple-50/50 dark:bg-[#0F0C20] border border-purple-200/30 dark:border-[#8B5CF6]/20">
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold text-[#1C143B] dark:text-white">Session Identifier</p>
+                <p className="text-[11px] text-[#554D74] dark:text-[#A59ECA] font-mono break-all">
+                  {userToken}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      <AdUnlockModal
-        prompt={unlockTargetPrompt}
-        isOpen={isUnlockModalOpen}
-        onClose={() => setIsUnlockModalOpen(false)}
-        onUnlockSuccess={() => {}}
-      />
     </div>
   );
 }

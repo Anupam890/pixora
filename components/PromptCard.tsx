@@ -52,10 +52,10 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
   };
 
   return (
-    <div className="masonry-item group relative bg-white dark:bg-[#141414] rounded-2xl overflow-hidden border border-[#E8E8E5] dark:border-[#222222] hover:border-[#D5D5D0] dark:hover:border-[#383838] shadow-xs hover:shadow-md transition-all duration-200">
+    <div className="masonry-item group relative bg-white dark:bg-[#150F2E] rounded-2xl overflow-hidden border border-[#DDD6FE]/70 dark:border-[#271E4C] hover:border-[#8B5CF6]/50 dark:hover:border-[#8B5CF6]/60 shadow-sm hover:shadow-xl hover:shadow-[#8B5CF6]/10 transition-all duration-300">
       <Link href={`/prompt/${prompt.slug}`} className="block relative">
         {/* Image Container */}
-        <div className={`relative w-full ${aspectClass} overflow-hidden bg-[#F3F3F1] dark:bg-[#1C1C1C]`}>
+        <div className={`relative w-full ${aspectClass} overflow-hidden bg-[#ECE8FB] dark:bg-[#120D26]`}>
           {!imageLoaded && (
             <div className="absolute inset-0 animate-shimmer" />
           )}
@@ -73,10 +73,10 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
 
           {/* Top Pill Badges */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-            <span className="text-[11px] font-semibold tracking-wide px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/10 shadow-xs">
+            <span className="text-[11px] font-semibold tracking-wide px-2.5 py-1 rounded-full bg-[#090714]/75 backdrop-blur-md text-[#F3F0FF] border border-white/10 shadow-xs">
               {prompt.category}
             </span>
-            <span className="text-[11px] font-medium tracking-wide px-2 py-1 rounded-full bg-white/85 dark:bg-black/75 backdrop-blur-md text-[#111111] dark:text-white shadow-xs">
+            <span className="text-[11px] font-medium tracking-wide px-2 py-1 rounded-full bg-white/90 dark:bg-[#161133]/90 backdrop-blur-md text-[#1C143B] dark:text-[#F3F0FF] border border-[#DDD6FE]/50 dark:border-white/10 shadow-xs">
               {prompt.aiModel}
             </span>
           </div>
@@ -88,8 +88,8 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
               onClick={handleFavoriteClick}
               className={`p-2 rounded-full backdrop-blur-md transition-transform duration-150 active:scale-90 shadow-sm ${
                 favorite
-                  ? "bg-red-50 dark:bg-red-950/80 text-red-600 hover:bg-red-100"
-                  : "bg-white/90 dark:bg-black/80 hover:bg-white dark:hover:bg-black text-[#111111] dark:text-white"
+                  ? "bg-red-50 dark:bg-red-950/80 text-red-500 hover:bg-red-100"
+                  : "bg-white/90 dark:bg-[#161133]/90 hover:bg-white dark:hover:bg-[#1F1746] text-[#1C143B] dark:text-[#F3F0FF]"
               }`}
               title="Add to Favorites"
             >
@@ -99,7 +99,7 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
             <button
               type="button"
               onClick={handleShareClick}
-              className="p-2 rounded-full bg-white/90 dark:bg-black/80 hover:bg-white dark:hover:bg-black text-[#111111] dark:text-white backdrop-blur-md transition-transform duration-150 active:scale-90 shadow-sm"
+              className="p-2 rounded-full bg-white/90 dark:bg-[#161133]/90 hover:bg-white dark:hover:bg-[#1F1746] text-[#1C143B] dark:text-[#F3F0FF] backdrop-blur-md transition-transform duration-150 active:scale-90 shadow-sm"
               title="Share Prompt"
             >
               <Share2 className="w-4 h-4" />
@@ -107,35 +107,23 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
           </div>
 
           {/* Bottom Overlay Gradient on Hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090714]/80 via-[#090714]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
 
-          {/* Fast Unlock Action Button on Hover */}
+          {/* View Action Button on Hover */}
           <div className="absolute bottom-3 inset-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-            {unlocked ? (
-              <div className="w-full py-2 px-3 rounded-xl bg-white/95 dark:bg-[#181818]/95 backdrop-blur-md text-[#111111] dark:text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm">
-                <Unlock className="w-3.5 h-3.5 text-[#6D5DFB]" />
-                <span>Unlocked · View Prompt</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={handleUnlockClick}
-                className="w-full py-2 px-3 rounded-xl bg-[#111111] dark:bg-white hover:bg-[#2A2A2A] dark:hover:bg-gray-100 text-white dark:text-[#111111] text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-              >
-                <Lock className="w-3.5 h-3.5 text-amber-400 dark:text-amber-600" />
-                <span>Unlock Prompt (5s Ad)</span>
-              </button>
-            )}
+            <div className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-[#8B5CF6]/30 transition-all">
+              <span>View Prompt & Blueprint</span>
+            </div>
           </div>
         </div>
 
         {/* Card Details Body */}
         <div className="p-4 space-y-2">
-          <h3 className="font-semibold text-[15px] sm:text-base text-[#111111] dark:text-[#EDEDED] leading-snug line-clamp-1 group-hover:text-[#6D5DFB] transition-colors">
+          <h3 className="font-semibold text-[15px] sm:text-base text-[#1C143B] dark:text-[#F3F0FF] leading-snug line-clamp-1 group-hover:text-[#8B5CF6] dark:group-hover:text-[#22D3EE] transition-colors">
             {prompt.title}
           </h3>
 
-          <div className="flex items-center justify-between text-xs text-[#6B6B6B] dark:text-[#999999]">
+          <div className="flex items-center justify-between text-xs text-[#584F7C] dark:text-[#A59ECA]">
             <div className="flex items-center gap-1.5">
               <span>{prompt.category}</span>
               <span>·</span>
@@ -144,28 +132,19 @@ export function PromptCard({ prompt, onQuickUnlock }: PromptCardProps) {
 
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1">
-                <Eye className="w-3 h-3 text-[#999999] dark:text-[#777777]" />
+                <Eye className="w-3 h-3 text-[#8A81AC] dark:text-[#726A99]" />
                 {prompt.viewCount.toLocaleString()}
               </span>
             </div>
           </div>
 
-          {/* Persistent Lock / Unlock Status Bar */}
-          <div className="pt-2 border-t border-[#F3F3F1] dark:border-[#1E1E1E] flex items-center justify-between">
-            {unlocked ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#6D5DFB]">
-                <Unlock className="w-3.5 h-3.5" />
-                <span>Prompt Unlocked</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#6B6B6B] dark:text-[#999999] group-hover:text-[#111111] dark:group-hover:text-white">
-                <Lock className="w-3.5 h-3.5 text-amber-500" />
-                <span>Unlock Prompt</span>
-              </span>
-            )}
-
-            <span className="text-[11px] font-medium text-[#999999] dark:text-[#666666]">
-              {prompt.unlockCount.toLocaleString()} unlocks
+          {/* Clean Author & Ratio Bar */}
+          <div className="pt-2 border-t border-[#EDE8FB] dark:border-[#201844] flex items-center justify-between text-[11px] text-[#584F7C] dark:text-[#A59ECA]">
+            <span className="font-medium truncate max-w-[150px]">
+              by {prompt.author.name}
+            </span>
+            <span className="px-2 py-0.5 rounded-md bg-[#EDE9FE]/60 dark:bg-[#1E1744] text-[#7C3AED] dark:text-[#A78BFA] font-medium text-[10px]">
+              {prompt.aspectRatio}
             </span>
           </div>
         </div>
